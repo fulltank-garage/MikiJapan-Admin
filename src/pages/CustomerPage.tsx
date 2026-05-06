@@ -5,7 +5,6 @@ import {
   LogOut,
   Mail,
   Menu,
-  Plus,
   Search,
   ShieldCheck,
   Trash2,
@@ -126,11 +125,6 @@ export function CustomerPage({
 
     return { active, pending, totalSpent }
   }, [customers])
-
-  const openCreateForm = () => {
-    setEditingCustomer(null)
-    setIsFormOpen(true)
-  }
 
   const openEditForm = (customer: Customer) => {
     setEditingCustomer(customer)
@@ -340,14 +334,6 @@ export function CustomerPage({
                   <option value="inactive">พักการใช้งาน</option>
                 </select>
 
-                <button
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#18202b] px-4 text-sm font-semibold text-white transition hover:bg-[#273242]"
-                  onClick={openCreateForm}
-                  type="button"
-                >
-                  <Plus size={18} />
-                  เพิ่มลูกค้า
-                </button>
               </div>
             </div>
 
