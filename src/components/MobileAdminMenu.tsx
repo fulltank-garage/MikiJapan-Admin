@@ -1,10 +1,10 @@
 import {
   LayoutDashboard,
   Mail,
-  ShieldCheck,
   UsersRound,
   X,
 } from 'lucide-react'
+import { BrandLogo } from './BrandLogo'
 import type { AuthSession } from '../services/api'
 
 type AdminPageKey = 'dashboard' | 'customers' | 'messages'
@@ -75,9 +75,7 @@ export function MobileAdminMenu({
         <aside className="flex max-h-screen w-[min(20rem,86vw)] flex-col overflow-y-auto bg-[#6f5238] px-5 py-5 text-white shadow-2xl">
           <div className="mb-8 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-lg bg-[#f7eadc] text-[#8f6847]">
-                <ShieldCheck size={22} />
-              </div>
+              <BrandLogo className="size-11 shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-[#f5dfc8]">
                   MikiJapan

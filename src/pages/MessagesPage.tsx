@@ -10,12 +10,12 @@ import {
   Menu,
   Phone,
   Search,
-  ShieldCheck,
   UserRound,
   UsersRound,
   XCircle,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import type { AuthSession } from '../services/api'
 
@@ -173,9 +173,7 @@ export function MessagesPage({
 
       <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white lg:flex">
         <div className="mb-9 flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-lg bg-[#f7eadc] text-[#6f5238]">
-            <ShieldCheck size={22} />
-          </div>
+          <BrandLogo className="size-11 shrink-0" />
           <div>
             <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
             <p className="text-lg font-semibold">Admin</p>

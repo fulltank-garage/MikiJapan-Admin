@@ -1,5 +1,6 @@
 import { ShieldCheck } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { BrandLogo } from '../components/BrandLogo'
 import { authApi, type AuthSession, type LoginPayload } from '../services/api'
 
 type LoginPageProps = {
@@ -38,9 +39,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     <main className="grid min-h-screen bg-[#fbf6f0] text-slate-900 lg:grid-cols-[minmax(360px,0.9fr)_1.1fr]">
       <section className="flex min-h-[36rem] flex-col justify-between bg-[#6f5238] px-6 py-8 text-white sm:px-10 lg:min-h-screen lg:px-12">
         <div className="flex items-center gap-3">
-          <div className="grid size-11 place-items-center rounded-lg bg-[#f7eadc] text-[#6f5238]">
-            <ShieldCheck size={24} strokeWidth={2.4} />
-          </div>
+          <BrandLogo className="size-12 shrink-0" />
           <div>
             <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
             <h1 className="text-2xl font-semibold">Admin Console</h1>
