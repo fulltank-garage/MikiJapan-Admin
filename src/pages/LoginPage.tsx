@@ -7,6 +7,8 @@ type LoginPageProps = {
   onLogin: (session: AuthSession) => void
 }
 
+const ADMIN_PASSWORD = '123456'
+
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [payload, setPayload] = useState<LoginPayload>({
     email: 'admin@mikijapan.co',
@@ -21,6 +23,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
     if (!payload.email || !payload.password) {
       setError('กรุณากรอกอีเมลและรหัสผ่าน')
+      return
+    }
+
+    if (payload.password !== ADMIN_PASSWORD) {
+      setError('รหัสผ่านไม่ถูกต้อง')
       return
     }
 
