@@ -11,7 +11,6 @@ import {
   Phone,
   Search,
   ShieldCheck,
-  Store,
   UserRound,
   UsersRound,
   XCircle,
@@ -28,8 +27,8 @@ type CustomerApplication = {
   nickname: string
   phone: string
   citizenId: string
-  shopLink: string
-  pageLink: string
+  storeImageUrl: string
+  storePageLink: string
   status: ApplicationStatus
 }
 
@@ -47,8 +46,9 @@ const applications: CustomerApplication[] = [
     nickname: 'Sakura',
     phone: '+81 90 1122 4588',
     citizenId: '1101700458899',
-    shopLink: 'https://shop.example.com/sakura-store',
-    pageLink: 'https://facebook.com/sakura.store',
+    storeImageUrl:
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80',
+    storePageLink: 'https://facebook.com/sakura.store',
     status: 'pending',
   },
   {
@@ -57,8 +57,9 @@ const applications: CustomerApplication[] = [
     nickname: 'Pong',
     phone: '+66 81 445 9081',
     citizenId: '1103700459081',
-    shopLink: 'https://shop.example.com/pong-market',
-    pageLink: 'https://facebook.com/pong.market',
+    storeImageUrl:
+      'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=900&q=80',
+    storePageLink: 'https://facebook.com/pong.market',
     status: 'pending',
   },
   {
@@ -67,8 +68,9 @@ const applications: CustomerApplication[] = [
     nickname: 'Mika',
     phone: '+81 80 7720 1190',
     citizenId: '1105700772119',
-    shopLink: 'https://shop.example.com/mika-select',
-    pageLink: 'https://facebook.com/mika.select',
+    storeImageUrl:
+      'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&w=900&q=80',
+    storePageLink: 'https://facebook.com/mika.select',
     status: 'approved',
   },
   {
@@ -77,8 +79,9 @@ const applications: CustomerApplication[] = [
     nickname: 'Nan',
     phone: '+66 92 780 4412',
     citizenId: '1109700784412',
-    shopLink: 'https://shop.example.com/nan-beauty',
-    pageLink: 'https://facebook.com/nan.beauty',
+    storeImageUrl:
+      'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=900&q=80',
+    storePageLink: 'https://facebook.com/nan.beauty',
     status: 'rejected',
   },
 ]
@@ -131,8 +134,7 @@ export function MessagesPage({
         application.nickname,
         application.phone,
         application.citizenId,
-        application.shopLink,
-        application.pageLink,
+        application.storePageLink,
       ]
         .join(' ')
         .toLowerCase()
@@ -300,9 +302,11 @@ export function MessagesPage({
                       type="button"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
-                          <UserRound size={20} />
-                        </div>
+                        <img
+                          alt={`หน้าร้านของ ${application.fullName}`}
+                          className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
+                          src={application.storeImageUrl}
+                        />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-semibold text-slate-950">
                             {application.fullName}
@@ -359,6 +363,14 @@ export function MessagesPage({
                   </div>
                 </div>
 
+                <div className="mb-5 overflow-hidden rounded-lg border border-[#ead8c7] bg-[#fff8f1]">
+                  <img
+                    alt={`รูปหน้าร้านของ ${selectedApplication.fullName}`}
+                    className="h-56 w-full object-cover sm:h-72"
+                    src={selectedApplication.storeImageUrl}
+                  />
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-2">
                   <InfoItem
                     icon={UserRound}
@@ -381,14 +393,9 @@ export function MessagesPage({
                     value={selectedApplication.citizenId}
                   />
                   <LinkItem
-                    icon={Store}
-                    label="ลิงก์ร้าน"
-                    value={selectedApplication.shopLink}
-                  />
-                  <LinkItem
                     icon={Link2}
-                    label="ลิงก์เพจ"
-                    value={selectedApplication.pageLink}
+                    label="ลิงก์ร้าน/เพจ"
+                    value={selectedApplication.storePageLink}
                   />
                 </div>
               </article>
