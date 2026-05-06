@@ -1,42 +1,25 @@
 import {
-  Bell,
   CheckCircle2,
   CircleDollarSign,
   ClipboardList,
-  Edit3,
   LayoutDashboard,
   LogOut,
   Mail,
   Menu,
-  Plus,
   Search,
   ShieldCheck,
-  Trash2,
   UserRound,
   UsersRound,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { CustomerFormModal } from '../components/CustomerFormModal'
-import { StatusBadge } from '../components/StatusBadge'
-import type { CustomerDraft } from '../components/TextField'
 import { customerSeed } from '../data/customerSeed'
 import {
   customerApi,
   isApiConfigured,
   type AuthSession,
   type Customer,
-  type CustomerSegment,
-  type CustomerStatus,
 } from '../services/api'
 import { moneyFormatter, numberFormatter } from '../utils/formatters'
-
-type StatusFilter = CustomerStatus | 'all'
-
-const segmentMeta: Record<CustomerSegment, string> = {
-  VIP: 'border-teal-200 bg-teal-50 text-teal-700',
-  Regular: 'border-sky-200 bg-sky-50 text-sky-700',
-  New: 'border-rose-200 bg-rose-50 text-rose-700',
-}
 
 type CustomerDashboardPageProps = {
   onLogout: () => void
@@ -53,10 +36,6 @@ export function CustomerDashboardPage({
 }: CustomerDashboardPageProps) {
   const [customers, setCustomers] = useState<Customer[]>(customerSeed)
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
   const [notice, setNotice] = useState('')
 
@@ -95,25 +74,18 @@ export function CustomerDashboardPage({
   const filteredCustomers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
-    return customers.filter((customer) => {
-      const matchesStatus =
-        statusFilter === 'all' || customer.status === statusFilter
-      const matchesQuery =
-        !normalizedQuery ||
-        [
-          customer.name,
-          customer.email,
-          customer.phone,
-          customer.country,
-          customer.segment,
-        ]
-          .join(' ')
-          .toLowerCase()
-          .includes(normalizedQuery)
-
-      return matchesStatus && matchesQuery
-    })
-  }, [customers, query, statusFilter])
+    return customers.filter((customer) =>
+      [
+        customer.name,
+        customer.email,
+        customer.phone,
+        customer.country,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedQuery),
+    )
+  }, [customers, query])
 
   const stats = useMemo(() => {
     const totalSpent = customers.reduce(
@@ -124,10 +96,6 @@ export function CustomerDashboardPage({
       (sum, customer) => sum + customer.totalOrders,
       0,
     )
-    const pending = customers.filter(
-      (customer) => customer.status === 'pending',
-    ).length
-
     return [
       {
         label: 'ลูกค้าทั้งหมด',
@@ -150,86 +118,8 @@ export function CustomerDashboardPage({
         icon: CircleDollarSign,
         className: 'bg-emerald-50 text-emerald-700',
       },
-      {
-        label: 'รอติดตาม',
-        value: numberFormatter.format(pending),
-        helper: 'ต้องดำเนินการ',
-        icon: Bell,
-        className: 'bg-amber-50 text-amber-700',
-      },
     ]
   }, [customers])
-
-  const openCreateForm = () => {
-    setEditingCustomer(null)
-    setIsFormOpen(true)
-  }
-
-  const openEditForm = (customer: Customer) => {
-    setEditingCustomer(customer)
-    setIsFormOpen(true)
-  }
-
-  const closeForm = () => {
-    setIsFormOpen(false)
-    setEditingCustomer(null)
-  }
-
-  const handleSaveCustomer = async (draft: CustomerDraft) => {
-    setIsSaving(true)
-    setNotice('')
-
-    try {
-      if (editingCustomer) {
-        const updatedCustomer = isApiConfigured
-          ? await customerApi.update(editingCustomer.id, draft)
-          : { ...draft, id: editingCustomer.id }
-
-        setCustomers((current) =>
-          current.map((customer) =>
-            customer.id === editingCustomer.id ? updatedCustomer : customer,
-          ),
-        )
-        setNotice('อัปเดตข้อมูลลูกค้าแล้ว')
-      } else {
-        const createdCustomer = isApiConfigured
-          ? await customerApi.create(draft)
-          : { ...draft, id: crypto.randomUUID() }
-
-        setCustomers((current) => [createdCustomer, ...current])
-        setNotice('เพิ่มลูกค้าใหม่แล้ว')
-      }
-
-      closeForm()
-    } catch {
-      setNotice('บันทึกข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const handleDeleteCustomer = async (customer: Customer) => {
-    const confirmed = window.confirm(`ลบข้อมูลของ ${customer.name} หรือไม่?`)
-
-    if (!confirmed) {
-      return
-    }
-
-    setNotice('')
-
-    try {
-      if (isApiConfigured) {
-        await customerApi.remove(customer.id)
-      }
-
-      setCustomers((current) =>
-        current.filter((item) => item.id !== customer.id),
-      )
-      setNotice('ลบข้อมูลลูกค้าแล้ว')
-    } catch {
-      setNotice('ลบข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
-    }
-  }
 
   return (
     <div className="min-h-screen bg-[#f4f6f8] text-slate-900">
@@ -319,7 +209,7 @@ export function CustomerDashboardPage({
         </header>
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {stats.map((item) => {
               const Icon = item.icon
 
@@ -361,7 +251,7 @@ export function CustomerDashboardPage({
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <label className="relative block min-w-0 sm:w-72">
+                <label className="relative block min-w-0 sm:w-80">
                   <Search
                     className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                     size={18}
@@ -373,28 +263,6 @@ export function CustomerDashboardPage({
                     value={query}
                   />
                 </label>
-
-                <select
-                  className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                  onChange={(event) =>
-                    setStatusFilter(event.target.value as StatusFilter)
-                  }
-                  value={statusFilter}
-                >
-                  <option value="all">ทุกสถานะ</option>
-                  <option value="active">ใช้งาน</option>
-                  <option value="pending">รอติดตาม</option>
-                  <option value="inactive">พักการใช้งาน</option>
-                </select>
-
-                <button
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#18202b] px-4 text-sm font-semibold text-white transition hover:bg-[#273242]"
-                  onClick={openCreateForm}
-                  type="button"
-                >
-                  <Plus size={18} />
-                  เพิ่มลูกค้า
-                </button>
               </div>
             </div>
 
@@ -407,21 +275,10 @@ export function CustomerDashboardPage({
             <CustomerTable
               customers={filteredCustomers}
               isLoading={isLoadingCustomers}
-              onDelete={handleDeleteCustomer}
-              onEdit={openEditForm}
             />
           </section>
         </main>
       </div>
-
-      {isFormOpen ? (
-        <CustomerFormModal
-          customer={editingCustomer}
-          isSaving={isSaving}
-          onClose={closeForm}
-          onSubmit={handleSaveCustomer}
-        />
-      ) : null}
     </div>
   )
 }
@@ -429,29 +286,19 @@ export function CustomerDashboardPage({
 type CustomerTableProps = {
   customers: Customer[]
   isLoading: boolean
-  onDelete: (customer: Customer) => void
-  onEdit: (customer: Customer) => void
 }
 
-function CustomerTable({
-  customers,
-  isLoading,
-  onDelete,
-  onEdit,
-}: CustomerTableProps) {
+function CustomerTable({ customers, isLoading }: CustomerTableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[980px] border-collapse text-left">
+      <table className="w-full min-w-[760px] border-collapse text-left">
         <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
           <tr>
             <th className="px-5 py-3">ลูกค้า</th>
             <th className="px-5 py-3">ติดต่อ</th>
-            <th className="px-5 py-3">กลุ่ม</th>
-            <th className="px-5 py-3">สถานะ</th>
             <th className="px-5 py-3 text-right">คำสั่งซื้อ</th>
             <th className="px-5 py-3 text-right">ยอดใช้จ่าย</th>
             <th className="px-5 py-3">ติดต่อล่าสุด</th>
-            <th className="px-5 py-3 text-right">จัดการ</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -459,7 +306,7 @@ function CustomerTable({
             <tr>
               <td
                 className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={8}
+                colSpan={5}
               >
                 กำลังโหลดข้อมูลลูกค้า
               </td>
@@ -470,7 +317,7 @@ function CustomerTable({
             <tr>
               <td
                 className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={8}
+                colSpan={5}
               >
                 ไม่พบข้อมูลที่ค้นหา
               </td>
@@ -504,16 +351,6 @@ function CustomerTable({
                     {customer.phone}
                   </p>
                 </td>
-                <td className="px-5 py-4">
-                  <span
-                    className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${segmentMeta[customer.segment]}`}
-                  >
-                    {customer.segment}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  <StatusBadge status={customer.status} />
-                </td>
                 <td className="px-5 py-4 text-right text-sm text-slate-700">
                   {numberFormatter.format(customer.totalOrders)}
                 </td>
@@ -522,26 +359,6 @@ function CustomerTable({
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
                   {customer.lastContact}
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex justify-end gap-2">
-                    <button
-                      className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
-                      onClick={() => onEdit(customer)}
-                      title="แก้ไข"
-                      type="button"
-                    >
-                      <Edit3 size={16} />
-                    </button>
-                    <button
-                      className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                      onClick={() => onDelete(customer)}
-                      title="ลบ"
-                      type="button"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
                 </td>
               </tr>
             ))}
