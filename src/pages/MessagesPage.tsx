@@ -171,7 +171,7 @@ export function MessagesPage({
         <nav className="space-y-2">
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
-            onClick={onOpenCustomers}
+            onClick={onBackToDashboard}
             type="button"
           >
             <LayoutDashboard size={18} />
@@ -179,7 +179,7 @@ export function MessagesPage({
           </button>
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
-            onClick={onBackToDashboard}
+            onClick={onOpenCustomers}
             type="button"
           >
             <UsersRound size={18} />
