@@ -12,6 +12,7 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import { customerSeed } from '../data/customerSeed'
 import {
   customerApi,
@@ -37,6 +38,7 @@ export function CustomerDashboardPage({
   const [customers, setCustomers] = useState<Customer[]>(customerSeed)
   const [query, setQuery] = useState('')
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
 
   useEffect(() => {
@@ -102,45 +104,55 @@ export function CustomerDashboardPage({
         value: numberFormatter.format(customers.length),
         helper: 'รายการในระบบ',
         icon: UsersRound,
-        className: 'bg-teal-50 text-teal-700',
+        className: 'bg-[#fbf1e7] text-[#8f6847]',
       },
       {
         label: 'คำสั่งซื้อ',
         value: numberFormatter.format(totalOrders),
         helper: 'สะสมทุกลูกค้า',
         icon: ClipboardList,
-        className: 'bg-sky-50 text-sky-700',
+        className: 'bg-[#f7eadc] text-[#8f6847]',
       },
       {
         label: 'ยอดใช้จ่าย',
         value: moneyFormatter.format(totalSpent),
         helper: 'มูลค่ารวม',
         icon: CircleDollarSign,
-        className: 'bg-emerald-50 text-emerald-700',
+        className: 'bg-[#f4e7d9] text-[#6f5238]',
       },
     ]
   }, [customers])
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] text-slate-900">
-      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#18202b] px-5 py-6 text-white lg:flex">
+    <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+      <MobileAdminMenu
+        activePage="dashboard"
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        onOpenCustomers={onOpenCustomers}
+        onOpenDashboard={() => setIsMobileMenuOpen(false)}
+        onOpenMessages={onOpenMessages}
+        session={session}
+      />
+
+      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white lg:flex">
         <div className="mb-9 flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-lg bg-teal-400 text-[#18202b]">
+          <div className="grid size-10 place-items-center rounded-lg bg-[#f7eadc] text-[#6f5238]">
             <ShieldCheck size={22} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-teal-100">MikiJapan</p>
+            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
             <p className="text-lg font-semibold">Admin</p>
           </div>
         </div>
 
         <nav className="space-y-2">
-          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-white/12 px-3 text-left text-sm font-medium text-white">
+          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
             <LayoutDashboard size={18} />
             Dashboard
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenCustomers}
             type="button"
           >
@@ -148,7 +160,7 @@ export function CustomerDashboardPage({
             Customers
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenMessages}
             type="button"
           >
@@ -157,47 +169,50 @@ export function CustomerDashboardPage({
           </button>
         </nav>
 
-        <div className="mt-auto rounded-lg border border-white/12 bg-white/8 p-4">
+        <div className="mt-auto rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4">
           <p className="text-sm font-medium text-white">{session.user.name}</p>
-          <p className="mt-1 break-all text-xs text-slate-300">
+          <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
         </div>
       </aside>
 
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <button
-                className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 lg:hidden"
+                aria-expanded={isMobileMenuOpen}
+                aria-label="เปิดเมนูหมวด"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 lg:hidden"
+                onClick={() => setIsMobileMenuOpen(true)}
                 title="เมนู"
                 type="button"
               >
                 <Menu size={20} />
               </button>
               <div>
-                <p className="text-sm font-medium text-teal-700">
+                <p className="text-sm font-medium text-[#8f6847]">
                   Customer Management
                 </p>
-                <h1 className="text-2xl font-semibold text-slate-950">
+                <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
                   แดชบอร์ดจัดการลูกค้า
                 </h1>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700">
+              <span className="hidden h-10 items-center gap-2 rounded-lg border border-[#ead8c7] bg-white px-3 text-sm font-medium text-slate-700 sm:inline-flex">
                 <CheckCircle2
                   className={
-                    isApiConfigured ? 'text-emerald-600' : 'text-amber-600'
+                    isApiConfigured ? 'text-[#8f6847]' : 'text-[#c49a6c]'
                   }
                   size={17}
                 />
                 {isApiConfigured ? 'API พร้อมใช้งาน' : 'ข้อมูลตัวอย่าง'}
               </span>
               <button
-                className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
                 onClick={onLogout}
                 title="ออกจากระบบ"
                 type="button"
@@ -215,7 +230,7 @@ export function CustomerDashboardPage({
 
               return (
                 <article
-                  className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+                  className="rounded-lg border border-[#ead8c7] bg-white p-5 shadow-sm"
                   key={item.label}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -239,8 +254,8 @@ export function CustomerDashboardPage({
             })}
           </section>
 
-          <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
+          <section className="mt-6 rounded-lg border border-[#ead8c7] bg-white shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
                   รายชื่อลูกค้า
@@ -257,7 +272,7 @@ export function CustomerDashboardPage({
                     size={18}
                   />
                   <input
-                    className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                    className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="ค้นหาลูกค้า"
                     value={query}
@@ -267,7 +282,7 @@ export function CustomerDashboardPage({
             </div>
 
             {notice ? (
-              <div className="border-b border-slate-200 bg-teal-50 px-5 py-3 text-sm text-teal-800">
+              <div className="border-b border-[#ead8c7] bg-[#fbf1e7] px-5 py-3 text-sm text-[#6f5238]">
                 {notice}
               </div>
             ) : null}
@@ -292,7 +307,7 @@ function CustomerTable({ customers, isLoading }: CustomerTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[760px] border-collapse text-left">
-        <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+        <thead className="bg-[#fff8f1] text-xs font-semibold uppercase text-slate-500">
           <tr>
             <th className="px-5 py-3">ลูกค้า</th>
             <th className="px-5 py-3">ติดต่อ</th>
@@ -301,7 +316,7 @@ function CustomerTable({ customers, isLoading }: CustomerTableProps) {
             <th className="px-5 py-3">ติดต่อล่าสุด</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-[#ead8c7]">
           {isLoading ? (
             <tr>
               <td
@@ -327,12 +342,12 @@ function CustomerTable({ customers, isLoading }: CustomerTableProps) {
           {!isLoading &&
             customers.map((customer) => (
               <tr
-                className="align-top transition hover:bg-slate-50"
+                className="align-top transition hover:bg-[#fff8f1]"
                 key={customer.id}
               >
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600">
+                    <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
                       <UserRound size={19} />
                     </div>
                     <div>

@@ -64,9 +64,9 @@ export function CustomerFormModal({
         className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white shadow-xl"
         onSubmit={handleSubmit}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#ead8c7] px-5 py-4">
           <div>
-            <p className="text-sm font-medium text-teal-700">
+            <p className="text-sm font-medium text-[#8f6847]">
               {customer ? 'แก้ไขข้อมูล' : 'เพิ่มข้อมูล'}
             </p>
             <h2 className="text-xl font-semibold text-slate-950">
@@ -74,7 +74,7 @@ export function CustomerFormModal({
             </h2>
           </div>
           <button
-            className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+            className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-600 transition hover:bg-[#fff8f1]"
             onClick={onClose}
             title="ปิด"
             type="button"
@@ -119,7 +119,7 @@ export function CustomerFormModal({
               กลุ่มลูกค้า
             </span>
             <select
-              className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
               onChange={(event) =>
                 updateField('segment', event.target.value as CustomerSegment)
               }
@@ -136,7 +136,7 @@ export function CustomerFormModal({
               สถานะ
             </span>
             <select
-              className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
               onChange={(event) =>
                 updateField('status', event.target.value as CustomerStatus)
               }
@@ -179,23 +179,23 @@ export function CustomerFormModal({
               หมายเหตุ
             </span>
             <textarea
-              className="min-h-28 w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              className="min-h-28 w-full resize-y rounded-lg border border-[#dbc6b2] bg-white px-3 py-3 text-sm text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
               onChange={(event) => updateField('note', event.target.value)}
               value={form.note}
             />
           </label>
         </div>
 
-        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 border-t border-[#ead8c7] px-5 py-4 sm:flex-row sm:justify-end">
           <button
-            className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex h-11 items-center justify-center rounded-lg border border-[#dbc6b2] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-[#fff8f1]"
             onClick={onClose}
             type="button"
           >
             ยกเลิก
           </button>
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#18202b] px-4 text-sm font-semibold text-white transition hover:bg-[#273242] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#6f5238] px-4 text-sm font-semibold text-white transition hover:bg-[#7f6043] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isSaving}
             type="submit"
           >

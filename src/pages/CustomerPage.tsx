@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CustomerFormModal } from '../components/CustomerFormModal'
+import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import { StatusBadge } from '../components/StatusBadge'
 import type { CustomerDraft } from '../components/TextField'
 import { customerSeed } from '../data/customerSeed'
@@ -36,9 +37,9 @@ type CustomerPageProps = {
 }
 
 const segmentMeta: Record<CustomerSegment, string> = {
-  VIP: 'border-teal-200 bg-teal-50 text-teal-700',
-  Regular: 'border-sky-200 bg-sky-50 text-sky-700',
-  New: 'border-rose-200 bg-rose-50 text-rose-700',
+  VIP: 'border-[#d8c1a8] bg-[#fbf1e7] text-[#8f6847]',
+  Regular: 'border-[#dfcbb8] bg-[#f7eadc] text-[#8f6847]',
+  New: 'border-[#d8b8a7] bg-[#f8eee8] text-[#9a5f45]',
 }
 
 export function CustomerPage({
@@ -54,6 +55,7 @@ export function CustomerPage({
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
 
   useEffect(() => {
@@ -193,33 +195,43 @@ export function CustomerPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] text-slate-900">
-      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#18202b] px-5 py-6 text-white lg:flex">
+    <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+      <MobileAdminMenu
+        activePage="customers"
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        onOpenCustomers={() => setIsMobileMenuOpen(false)}
+        onOpenDashboard={onOpenDashboard}
+        onOpenMessages={onOpenMessages}
+        session={session}
+      />
+
+      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white lg:flex">
         <div className="mb-9 flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-lg bg-teal-400 text-[#18202b]">
+          <div className="grid size-10 place-items-center rounded-lg bg-[#f7eadc] text-[#6f5238]">
             <ShieldCheck size={22} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-teal-100">MikiJapan</p>
+            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
             <p className="text-lg font-semibold">Admin</p>
           </div>
         </div>
 
         <nav className="space-y-2">
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenDashboard}
             type="button"
           >
             <LayoutDashboard size={18} />
             Dashboard
           </button>
-          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-white/12 px-3 text-left text-sm font-medium text-white">
+          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
             <UsersRound size={18} />
             Customers
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenMessages}
             type="button"
           >
@@ -228,47 +240,50 @@ export function CustomerPage({
           </button>
         </nav>
 
-        <div className="mt-auto rounded-lg border border-white/12 bg-white/8 p-4">
+        <div className="mt-auto rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4">
           <p className="text-sm font-medium text-white">{session.user.name}</p>
-          <p className="mt-1 break-all text-xs text-slate-300">
+          <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
         </div>
       </aside>
 
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <button
-                className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 lg:hidden"
+                aria-expanded={isMobileMenuOpen}
+                aria-label="เปิดเมนูหมวด"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 lg:hidden"
+                onClick={() => setIsMobileMenuOpen(true)}
                 title="เมนู"
                 type="button"
               >
                 <Menu size={20} />
               </button>
               <div>
-                <p className="text-sm font-medium text-teal-700">
+                <p className="text-sm font-medium text-[#8f6847]">
                   Customer Page
                 </p>
-                <h1 className="text-2xl font-semibold text-slate-950">
+                <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
                   จัดการข้อมูลลูกค้า
                 </h1>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700">
+              <span className="hidden h-10 items-center gap-2 rounded-lg border border-[#ead8c7] bg-white px-3 text-sm font-medium text-slate-700 sm:inline-flex">
                 <CheckCircle2
                   className={
-                    isApiConfigured ? 'text-emerald-600' : 'text-amber-600'
+                    isApiConfigured ? 'text-[#8f6847]' : 'text-[#c49a6c]'
                   }
                   size={17}
                 />
                 {isApiConfigured ? 'API พร้อมใช้งาน' : 'ข้อมูลตัวอย่าง'}
               </span>
               <button
-                className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
                 onClick={onLogout}
                 title="ออกจากระบบ"
                 type="button"
@@ -295,8 +310,8 @@ export function CustomerPage({
             />
           </section>
 
-          <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
+          <section className="mt-6 rounded-lg border border-[#ead8c7] bg-white shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
                   Customer List
@@ -314,7 +329,7 @@ export function CustomerPage({
                     size={18}
                   />
                   <input
-                    className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                    className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="ค้นหาชื่อ อีเมล เบอร์โทร"
                     value={query}
@@ -322,7 +337,7 @@ export function CustomerPage({
                 </label>
 
                 <select
-                  className="h-11 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  className="h-11 rounded-lg border border-[#dbc6b2] bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
                   onChange={(event) =>
                     setStatusFilter(event.target.value as StatusFilter)
                   }
@@ -338,20 +353,20 @@ export function CustomerPage({
             </div>
 
             {notice ? (
-              <div className="border-b border-slate-200 bg-teal-50 px-5 py-3 text-sm text-teal-800">
+              <div className="border-b border-[#ead8c7] bg-[#fbf1e7] px-5 py-3 text-sm text-[#6f5238]">
                 {notice}
               </div>
             ) : null}
 
             <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-2">
               {isLoadingCustomers ? (
-                <p className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 xl:col-span-2">
+                <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500 xl:col-span-2">
                   กำลังโหลดข้อมูลลูกค้า
                 </p>
               ) : null}
 
               {!isLoadingCustomers && filteredCustomers.length === 0 ? (
-                <p className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 xl:col-span-2">
+                <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500 xl:col-span-2">
                   ไม่พบข้อมูลที่ค้นหา
                 </p>
               ) : null}
@@ -359,12 +374,12 @@ export function CustomerPage({
               {!isLoadingCustomers &&
                 filteredCustomers.map((customer) => (
                   <article
-                    className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+                    className="rounded-lg border border-[#ead8c7] bg-white p-5 shadow-sm"
                     key={customer.id}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600">
+                        <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
                           <UserRound size={22} />
                         </div>
                         <div>
@@ -392,7 +407,7 @@ export function CustomerPage({
                       />
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#ead8c7] pt-4">
                       <div>
                         <span
                           className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${segmentMeta[customer.segment]}`}
@@ -405,7 +420,7 @@ export function CustomerPage({
                       </div>
                       <div className="flex gap-2">
                         <button
-                          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
+                          className="grid size-9 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-600 transition hover:border-[#d8c1a8] hover:bg-[#fbf1e7] hover:text-[#8f6847]"
                           onClick={() => openEditForm(customer)}
                           title="แก้ไข"
                           type="button"
@@ -413,7 +428,7 @@ export function CustomerPage({
                           <Edit3 size={16} />
                         </button>
                         <button
-                          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                          className="grid size-9 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-600 transition hover:border-[#d8b8a7] hover:bg-[#f8eee8] hover:text-[#9a5f45]"
                           onClick={() => handleDeleteCustomer(customer)}
                           title="ลบ"
                           type="button"
@@ -424,7 +439,7 @@ export function CustomerPage({
                     </div>
 
                     {customer.note ? (
-                      <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                      <p className="mt-4 rounded-lg bg-[#fff8f1] px-3 py-2 text-sm text-slate-600">
                         {customer.note}
                       </p>
                     ) : null}
@@ -449,7 +464,7 @@ export function CustomerPage({
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="rounded-lg border border-[#ead8c7] bg-white p-5 shadow-sm">
       <p className="text-sm font-medium text-slate-500">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
     </article>
@@ -458,7 +473,7 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
 
 function CustomerDetail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-2">
+    <div className="rounded-lg bg-[#fff8f1] px-3 py-2">
       <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className="mt-1 font-medium text-slate-800">{value}</p>
     </div>

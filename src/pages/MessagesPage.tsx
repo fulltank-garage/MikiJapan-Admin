@@ -17,6 +17,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import type { AuthSession } from '../services/api'
 
 type ApplicationStatus = 'pending' | 'approved' | 'rejected'
@@ -88,17 +89,17 @@ const statusMeta: Record<
 > = {
   pending: {
     label: 'รอตรวจสอบ',
-    className: 'border-amber-200 bg-amber-50 text-amber-700',
+    className: 'border-[#e6d0b8] bg-[#fff8f1] text-[#9a7655]',
     icon: Clock3,
   },
   approved: {
     label: 'ยืนยันแล้ว',
-    className: 'border-teal-200 bg-teal-50 text-teal-700',
+    className: 'border-[#d8c1a8] bg-[#fbf1e7] text-[#8f6847]',
     icon: CheckCircle2,
   },
   rejected: {
     label: 'ปฏิเสธแล้ว',
-    className: 'border-rose-200 bg-rose-50 text-rose-700',
+    className: 'border-[#d8b8a7] bg-[#f8eee8] text-[#9a5f45]',
     icon: XCircle,
   },
 }
@@ -112,6 +113,7 @@ export function MessagesPage({
   const [customerApplications, setCustomerApplications] =
     useState(applications)
   const [query, setQuery] = useState('')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedApplicationId, setSelectedApplicationId] = useState(
     customerApplications[0].id,
   )
@@ -156,21 +158,31 @@ export function MessagesPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] text-slate-900">
-      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#18202b] px-5 py-6 text-white lg:flex">
+    <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+      <MobileAdminMenu
+        activePage="messages"
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        onOpenCustomers={onOpenCustomers}
+        onOpenDashboard={onBackToDashboard}
+        onOpenMessages={() => setIsMobileMenuOpen(false)}
+        session={session}
+      />
+
+      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white lg:flex">
         <div className="mb-9 flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-lg bg-teal-400 text-[#18202b]">
+          <div className="grid size-10 place-items-center rounded-lg bg-[#f7eadc] text-[#6f5238]">
             <ShieldCheck size={22} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-teal-100">MikiJapan</p>
+            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
             <p className="text-lg font-semibold">Admin</p>
           </div>
         </div>
 
         <nav className="space-y-2">
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onBackToDashboard}
             type="button"
           >
@@ -178,7 +190,7 @@ export function MessagesPage({
             Dashboard
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenCustomers}
             type="button"
           >
@@ -186,7 +198,7 @@ export function MessagesPage({
             Customers
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg bg-white/12 px-3 text-left text-sm font-medium text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white"
             type="button"
           >
             <Mail size={18} />
@@ -194,30 +206,33 @@ export function MessagesPage({
           </button>
         </nav>
 
-        <div className="mt-auto rounded-lg border border-white/12 bg-white/8 p-4">
+        <div className="mt-auto rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4">
           <p className="text-sm font-medium text-white">{session.user.name}</p>
-          <p className="mt-1 break-all text-xs text-slate-300">
+          <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
         </div>
       </aside>
 
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <button
-                className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 lg:hidden"
+                aria-expanded={isMobileMenuOpen}
+                aria-label="เปิดเมนูหมวด"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 lg:hidden"
+                onClick={() => setIsMobileMenuOpen(true)}
                 title="Menu"
                 type="button"
               >
                 <Menu size={20} />
               </button>
               <div>
-                <p className="text-sm font-medium text-teal-700">
+                <p className="text-sm font-medium text-[#8f6847]">
                   Customer Applications
                 </p>
-                <h1 className="text-2xl font-semibold text-slate-950">
+                <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
                   ข้อมูลการสมัครของลูกค้า
                 </h1>
               </div>
@@ -225,7 +240,7 @@ export function MessagesPage({
 
             <div className="flex items-center gap-2">
               <button
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#ead8c7] bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-[#fff8f1]"
                 onClick={onBackToDashboard}
                 type="button"
               >
@@ -233,7 +248,7 @@ export function MessagesPage({
                 Dashboard
               </button>
               <button
-                className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
                 onClick={onLogout}
                 title="Logout"
                 type="button"
@@ -245,8 +260,8 @@ export function MessagesPage({
         </header>
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
+          <section className="rounded-lg border border-[#ead8c7] bg-white shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
                   รายการสมัคร
@@ -262,7 +277,7 @@ export function MessagesPage({
                   size={18}
                 />
                 <input
-                  className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                  className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="ค้นหาข้อมูลการสมัคร"
                   value={query}
@@ -271,13 +286,13 @@ export function MessagesPage({
             </div>
 
             <div className="grid min-h-[34rem] xl:grid-cols-[minmax(360px,0.88fr)_1.12fr]">
-              <div className="border-b border-slate-200 xl:border-b-0 xl:border-r">
-                <div className="divide-y divide-slate-100">
+              <div className="border-b border-[#ead8c7] xl:border-b-0 xl:border-r">
+                <div className="divide-y divide-[#ead8c7]">
                   {filteredApplications.map((application) => (
                     <button
-                      className={`block w-full px-4 py-4 text-left transition hover:bg-slate-50 sm:px-5 ${
+                      className={`block w-full px-4 py-4 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
                         selectedApplication.id === application.id
-                          ? 'bg-teal-50/70'
+                          ? 'bg-[#fbf1e7]/70'
                           : ''
                       }`}
                       key={application.id}
@@ -285,7 +300,7 @@ export function MessagesPage({
                       type="button"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600">
+                        <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
                           <UserRound size={20} />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -312,7 +327,7 @@ export function MessagesPage({
               <article className="p-5">
                 <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
-                    <p className="text-sm font-medium text-teal-700">
+                    <p className="text-sm font-medium text-[#8f6847]">
                       Application Detail
                     </p>
                     <h2 className="mt-1 text-xl font-semibold text-slate-950">
@@ -324,7 +339,7 @@ export function MessagesPage({
                       status={selectedApplication.status}
                     />
                     <button
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-teal-600 px-3 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-55"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
                       disabled={selectedApplication.status === 'approved'}
                       onClick={() => updateApplicationStatus('approved')}
                       type="button"
@@ -333,7 +348,7 @@ export function MessagesPage({
                       ยืนยันการสมัคร
                     </button>
                     <button
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-55"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
                       disabled={selectedApplication.status === 'rejected'}
                       onClick={() => updateApplicationStatus('rejected')}
                       type="button"
@@ -393,7 +408,7 @@ type InfoItemProps = {
 
 function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
         <Icon size={17} />
         {label}
@@ -407,13 +422,13 @@ function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
 
 function LinkItem({ icon: Icon, label, value }: InfoItemProps) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
         <Icon size={17} />
         {label}
       </div>
       <a
-        className="inline-flex max-w-full items-center gap-2 break-all text-sm font-semibold text-teal-700 hover:text-teal-800"
+        className="inline-flex max-w-full items-center gap-2 break-all text-sm font-semibold text-[#8f6847] hover:text-[#6f5238]"
         href={value}
         rel="noreferrer"
         target="_blank"

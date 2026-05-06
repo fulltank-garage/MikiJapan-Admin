@@ -6,18 +6,18 @@ const statusMeta: Record<
 > = {
   active: {
     label: 'ใช้งาน',
-    className: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    dotClassName: 'bg-emerald-500',
+    className: 'border-[#d8c1a8] bg-[#fbf1e7] text-[#8f6847]',
+    dotClassName: 'bg-[#9a7655]',
   },
   pending: {
     label: 'รอติดตาม',
-    className: 'border-amber-200 bg-amber-50 text-amber-700',
-    dotClassName: 'bg-amber-500',
+    className: 'border-[#e6d0b8] bg-[#fff8f1] text-[#9a7655]',
+    dotClassName: 'bg-[#c49a6c]',
   },
   inactive: {
     label: 'พักการใช้งาน',
-    className: 'border-slate-200 bg-slate-100 text-slate-600',
-    dotClassName: 'bg-slate-400',
+    className: 'border-[#d7c4b4] bg-[#f3ebe3] text-[#6f5238]',
+    dotClassName: 'bg-[#a9917d]',
   },
 }
 

@@ -35,20 +35,20 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="grid min-h-screen bg-[#f4f6f8] text-slate-900 lg:grid-cols-[minmax(360px,0.9fr)_1.1fr]">
-      <section className="flex min-h-[36rem] flex-col justify-between bg-[#18202b] px-6 py-8 text-white sm:px-10 lg:min-h-screen lg:px-12">
+    <main className="grid min-h-screen bg-[#fbf6f0] text-slate-900 lg:grid-cols-[minmax(360px,0.9fr)_1.1fr]">
+      <section className="flex min-h-[36rem] flex-col justify-between bg-[#6f5238] px-6 py-8 text-white sm:px-10 lg:min-h-screen lg:px-12">
         <div className="flex items-center gap-3">
-          <div className="grid size-11 place-items-center rounded-lg bg-teal-400 text-[#18202b]">
+          <div className="grid size-11 place-items-center rounded-lg bg-[#f7eadc] text-[#6f5238]">
             <ShieldCheck size={24} strokeWidth={2.4} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-teal-100">MikiJapan</p>
+            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
             <h1 className="text-2xl font-semibold">Admin Console</h1>
           </div>
         </div>
 
         <div className="max-w-xl py-14">
-          <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-teal-50">
+          <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-[#fff8f1]">
             Customer Operations
           </p>
           <h2 className="text-4xl font-semibold leading-tight sm:text-5xl">
@@ -61,11 +61,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               ['24 ชม.', 'ตอบกลับเฉลี่ย'],
             ].map(([value, label]) => (
               <div
-                className="rounded-lg border border-white/12 bg-white/8 p-4"
+                className="rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4"
                 key={label}
               >
                 <p className="text-2xl font-semibold">{value}</p>
-                <p className="mt-1 text-sm text-slate-300">{label}</p>
+                <p className="mt-1 text-sm text-[#f5dfc8]">{label}</p>
               </div>
             ))}
           </div>
@@ -78,11 +78,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
       <section className="flex items-center justify-center px-5 py-10 sm:px-8">
         <form
-          className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+          className="w-full max-w-md rounded-lg border border-[#ead8c7] bg-white p-6 shadow-sm sm:p-8"
           onSubmit={handleSubmit}
         >
           <div className="mb-8">
-            <p className="text-sm font-medium text-teal-700">เข้าสู่ระบบ</p>
+            <p className="text-sm font-medium text-[#8f6847]">เข้าสู่ระบบ</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">
               Admin Login
             </h2>
@@ -93,7 +93,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               อีเมล
             </span>
             <input
-              className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-slate-900 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              className="h-12 w-full rounded-lg border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
               onChange={(event) =>
                 setPayload((current) => ({
                   ...current,
@@ -111,7 +111,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               รหัสผ่าน
             </span>
             <input
-              className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-slate-900 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+              className="h-12 w-full rounded-lg border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
               onChange={(event) =>
                 setPayload((current) => ({
                   ...current,
@@ -125,13 +125,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </label>
 
           {error ? (
-            <p className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <p className="mb-4 rounded-lg border border-[#d8b8a7] bg-[#f8eee8] px-4 py-3 text-sm text-[#9a5f45]">
               {error}
             </p>
           ) : null}
 
           <button
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#18202b] px-4 font-semibold text-white transition hover:bg-[#273242] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#6f5238] px-4 font-semibold text-white transition hover:bg-[#7f6043] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isLoading}
             type="submit"
           >
