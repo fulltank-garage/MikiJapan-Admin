@@ -40,11 +40,13 @@ const segmentMeta: Record<CustomerSegment, string> = {
 
 type CustomerDashboardPageProps = {
   onLogout: () => void
+  onOpenMessages: () => void
   session: AuthSession
 }
 
 export function CustomerDashboardPage({
   onLogout,
+  onOpenMessages,
   session,
 }: CustomerDashboardPageProps) {
   const [customers, setCustomers] = useState<Customer[]>(customerSeed)
@@ -249,7 +251,11 @@ export function CustomerDashboardPage({
             <UsersRound size={18} />
             Customers
           </button>
-          <button className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white">
+          <button
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            onClick={onOpenMessages}
+            type="button"
+          >
             <Mail size={18} />
             Messages
           </button>
