@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { CustomerPage } from './pages/CustomerPage'
 import { CustomerDashboardPage } from './pages/CustomerDashboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { MessagesPage } from './pages/MessagesPage'
 import type { AuthSession } from './services/api'
 
-type AdminPage = 'dashboard' | 'messages'
+type AdminPage = 'dashboard' | 'customers' | 'messages'
 
 const getStoredSession = () => {
   const stored = localStorage.getItem('admin_session')
@@ -45,11 +46,23 @@ function App() {
     return <LoginPage onLogin={handleLogin} />
   }
 
+  if (activePage === 'customers') {
+    return (
+      <CustomerPage
+        onLogout={handleLogout}
+        onOpenDashboard={() => setActivePage('dashboard')}
+        onOpenMessages={() => setActivePage('messages')}
+        session={session}
+      />
+    )
+  }
+
   if (activePage === 'messages') {
     return (
       <MessagesPage
         onBackToDashboard={() => setActivePage('dashboard')}
         onLogout={handleLogout}
+        onOpenCustomers={() => setActivePage('customers')}
         session={session}
       />
     )
@@ -59,6 +72,7 @@ function App() {
     <CustomerDashboardPage
       onLogout={handleLogout}
       onOpenMessages={() => setActivePage('messages')}
+      onOpenCustomers={() => setActivePage('customers')}
       session={session}
     />
   )

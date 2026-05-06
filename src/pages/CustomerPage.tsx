@@ -1,8 +1,5 @@
 import {
-  Bell,
   CheckCircle2,
-  CircleDollarSign,
-  ClipboardList,
   Edit3,
   LayoutDashboard,
   LogOut,
@@ -32,25 +29,25 @@ import { moneyFormatter, numberFormatter } from '../utils/formatters'
 
 type StatusFilter = CustomerStatus | 'all'
 
+type CustomerPageProps = {
+  onLogout: () => void
+  onOpenDashboard: () => void
+  onOpenMessages: () => void
+  session: AuthSession
+}
+
 const segmentMeta: Record<CustomerSegment, string> = {
   VIP: 'border-teal-200 bg-teal-50 text-teal-700',
   Regular: 'border-sky-200 bg-sky-50 text-sky-700',
   New: 'border-rose-200 bg-rose-50 text-rose-700',
 }
 
-type CustomerDashboardPageProps = {
-  onLogout: () => void
-  onOpenCustomers: () => void
-  onOpenMessages: () => void
-  session: AuthSession
-}
-
-export function CustomerDashboardPage({
+export function CustomerPage({
   onLogout,
-  onOpenCustomers,
+  onOpenDashboard,
   onOpenMessages,
   session,
-}: CustomerDashboardPageProps) {
+}: CustomerPageProps) {
   const [customers, setCustomers] = useState<Customer[]>(customerSeed)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -115,49 +112,19 @@ export function CustomerDashboardPage({
     })
   }, [customers, query, statusFilter])
 
-  const stats = useMemo(() => {
+  const customerSummary = useMemo(() => {
+    const active = customers.filter(
+      (customer) => customer.status === 'active',
+    ).length
+    const pending = customers.filter(
+      (customer) => customer.status === 'pending',
+    ).length
     const totalSpent = customers.reduce(
       (sum, customer) => sum + customer.totalSpent,
       0,
     )
-    const totalOrders = customers.reduce(
-      (sum, customer) => sum + customer.totalOrders,
-      0,
-    )
-    const pending = customers.filter(
-      (customer) => customer.status === 'pending',
-    ).length
 
-    return [
-      {
-        label: 'ลูกค้าทั้งหมด',
-        value: numberFormatter.format(customers.length),
-        helper: 'รายการในระบบ',
-        icon: UsersRound,
-        className: 'bg-teal-50 text-teal-700',
-      },
-      {
-        label: 'คำสั่งซื้อ',
-        value: numberFormatter.format(totalOrders),
-        helper: 'สะสมทุกลูกค้า',
-        icon: ClipboardList,
-        className: 'bg-sky-50 text-sky-700',
-      },
-      {
-        label: 'ยอดใช้จ่าย',
-        value: moneyFormatter.format(totalSpent),
-        helper: 'มูลค่ารวม',
-        icon: CircleDollarSign,
-        className: 'bg-emerald-50 text-emerald-700',
-      },
-      {
-        label: 'รอติดตาม',
-        value: numberFormatter.format(pending),
-        helper: 'ต้องดำเนินการ',
-        icon: Bell,
-        className: 'bg-amber-50 text-amber-700',
-      },
-    ]
+    return { active, pending, totalSpent }
   }, [customers])
 
   const openCreateForm = () => {
@@ -245,15 +212,15 @@ export function CustomerDashboardPage({
         </div>
 
         <nav className="space-y-2">
-          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-white/12 px-3 text-left text-sm font-medium text-white">
+          <button
+            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+            onClick={onOpenDashboard}
+            type="button"
+          >
             <LayoutDashboard size={18} />
             Dashboard
           </button>
-          <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
-            onClick={onOpenCustomers}
-            type="button"
-          >
+          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-white/12 px-3 text-left text-sm font-medium text-white">
             <UsersRound size={18} />
             Customers
           </button>
@@ -288,10 +255,10 @@ export function CustomerDashboardPage({
               </button>
               <div>
                 <p className="text-sm font-medium text-teal-700">
-                  Customer Management
+                  Customer Page
                 </p>
                 <h1 className="text-2xl font-semibold text-slate-950">
-                  แดชบอร์ดจัดการลูกค้า
+                  จัดการข้อมูลลูกค้า
                 </h1>
               </div>
             </div>
@@ -319,44 +286,30 @@ export function CustomerDashboardPage({
         </header>
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {stats.map((item) => {
-              const Icon = item.icon
-
-              return (
-                <article
-                  className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
-                  key={item.label}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-slate-500">
-                        {item.label}
-                      </p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-950">
-                        {item.value}
-                      </p>
-                    </div>
-                    <div
-                      className={`grid size-11 place-items-center rounded-lg ${item.className}`}
-                    >
-                      <Icon size={22} />
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-slate-500">{item.helper}</p>
-                </article>
-              )
-            })}
+          <section className="grid gap-4 md:grid-cols-3">
+            <SummaryCard
+              label="ลูกค้าทั้งหมด"
+              value={numberFormatter.format(customers.length)}
+            />
+            <SummaryCard
+              label="ลูกค้าใช้งาน"
+              value={numberFormatter.format(customerSummary.active)}
+            />
+            <SummaryCard
+              label="ยอดใช้จ่ายรวม"
+              value={moneyFormatter.format(customerSummary.totalSpent)}
+            />
           </section>
 
           <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
-                  รายชื่อลูกค้า
+                  Customer List
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {numberFormatter.format(filteredCustomers.length)} รายการ
+                  แสดง {numberFormatter.format(filteredCustomers.length)} รายการ
+                  และมี {numberFormatter.format(customerSummary.pending)} รายการที่รอติดตาม
                 </p>
               </div>
 
@@ -369,7 +322,7 @@ export function CustomerDashboardPage({
                   <input
                     className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="ค้นหาลูกค้า"
+                    placeholder="ค้นหาชื่อ อีเมล เบอร์โทร"
                     value={query}
                   />
                 </label>
@@ -404,12 +357,94 @@ export function CustomerDashboardPage({
               </div>
             ) : null}
 
-            <CustomerTable
-              customers={filteredCustomers}
-              isLoading={isLoadingCustomers}
-              onDelete={handleDeleteCustomer}
-              onEdit={openEditForm}
-            />
+            <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-2">
+              {isLoadingCustomers ? (
+                <p className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 xl:col-span-2">
+                  กำลังโหลดข้อมูลลูกค้า
+                </p>
+              ) : null}
+
+              {!isLoadingCustomers && filteredCustomers.length === 0 ? (
+                <p className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 xl:col-span-2">
+                  ไม่พบข้อมูลที่ค้นหา
+                </p>
+              ) : null}
+
+              {!isLoadingCustomers &&
+                filteredCustomers.map((customer) => (
+                  <article
+                    className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+                    key={customer.id}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600">
+                          <UserRound size={22} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-950">
+                            {customer.name}
+                          </h3>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {customer.email}
+                          </p>
+                        </div>
+                      </div>
+                      <StatusBadge status={customer.status} />
+                    </div>
+
+                    <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+                      <CustomerDetail label="เบอร์โทร" value={customer.phone} />
+                      <CustomerDetail label="ประเทศ" value={customer.country} />
+                      <CustomerDetail
+                        label="คำสั่งซื้อ"
+                        value={numberFormatter.format(customer.totalOrders)}
+                      />
+                      <CustomerDetail
+                        label="ยอดใช้จ่าย"
+                        value={moneyFormatter.format(customer.totalSpent)}
+                      />
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                      <div>
+                        <span
+                          className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${segmentMeta[customer.segment]}`}
+                        >
+                          {customer.segment}
+                        </span>
+                        <p className="mt-2 text-sm text-slate-500">
+                          ล่าสุด: {customer.lastContact}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
+                          onClick={() => openEditForm(customer)}
+                          title="แก้ไข"
+                          type="button"
+                        >
+                          <Edit3 size={16} />
+                        </button>
+                        <button
+                          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                          onClick={() => handleDeleteCustomer(customer)}
+                          title="ลบ"
+                          type="button"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {customer.note ? (
+                      <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                        {customer.note}
+                      </p>
+                    ) : null}
+                  </article>
+                ))}
+            </div>
           </section>
         </main>
       </div>
@@ -426,127 +461,20 @@ export function CustomerDashboardPage({
   )
 }
 
-type CustomerTableProps = {
-  customers: Customer[]
-  isLoading: boolean
-  onDelete: (customer: Customer) => void
-  onEdit: (customer: Customer) => void
+function SummaryCard({ label, value }: { label: string; value: string }) {
+  return (
+    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
+    </article>
+  )
 }
 
-function CustomerTable({
-  customers,
-  isLoading,
-  onDelete,
-  onEdit,
-}: CustomerTableProps) {
+function CustomerDetail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[980px] border-collapse text-left">
-        <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
-          <tr>
-            <th className="px-5 py-3">ลูกค้า</th>
-            <th className="px-5 py-3">ติดต่อ</th>
-            <th className="px-5 py-3">กลุ่ม</th>
-            <th className="px-5 py-3">สถานะ</th>
-            <th className="px-5 py-3 text-right">คำสั่งซื้อ</th>
-            <th className="px-5 py-3 text-right">ยอดใช้จ่าย</th>
-            <th className="px-5 py-3">ติดต่อล่าสุด</th>
-            <th className="px-5 py-3 text-right">จัดการ</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {isLoading ? (
-            <tr>
-              <td
-                className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={8}
-              >
-                กำลังโหลดข้อมูลลูกค้า
-              </td>
-            </tr>
-          ) : null}
-
-          {!isLoading && customers.length === 0 ? (
-            <tr>
-              <td
-                className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={8}
-              >
-                ไม่พบข้อมูลที่ค้นหา
-              </td>
-            </tr>
-          ) : null}
-
-          {!isLoading &&
-            customers.map((customer) => (
-              <tr
-                className="align-top transition hover:bg-slate-50"
-                key={customer.id}
-              >
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600">
-                      <UserRound size={19} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-950">
-                        {customer.name}
-                      </p>
-                      <p className="mt-1 max-w-52 truncate text-sm text-slate-500">
-                        {customer.note}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-4">
-                  <p className="text-sm text-slate-900">{customer.email}</p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {customer.phone}
-                  </p>
-                </td>
-                <td className="px-5 py-4">
-                  <span
-                    className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${segmentMeta[customer.segment]}`}
-                  >
-                    {customer.segment}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  <StatusBadge status={customer.status} />
-                </td>
-                <td className="px-5 py-4 text-right text-sm text-slate-700">
-                  {numberFormatter.format(customer.totalOrders)}
-                </td>
-                <td className="px-5 py-4 text-right text-sm font-medium text-slate-950">
-                  {moneyFormatter.format(customer.totalSpent)}
-                </td>
-                <td className="px-5 py-4 text-sm text-slate-600">
-                  {customer.lastContact}
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex justify-end gap-2">
-                    <button
-                      className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
-                      onClick={() => onEdit(customer)}
-                      title="แก้ไข"
-                      type="button"
-                    >
-                      <Edit3 size={16} />
-                    </button>
-                    <button
-                      className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                      onClick={() => onDelete(customer)}
-                      title="ลบ"
-                      type="button"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+    <div className="rounded-lg bg-slate-50 px-3 py-2">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-1 font-medium text-slate-800">{value}</p>
     </div>
   )
 }

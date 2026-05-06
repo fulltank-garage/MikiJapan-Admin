@@ -36,6 +36,7 @@ type MessageThread = {
 type MessagesPageProps = {
   onBackToDashboard: () => void
   onLogout: () => void
+  onOpenCustomers: () => void
   session: AuthSession
 }
 
@@ -114,6 +115,7 @@ const statusMeta: Record<
 export function MessagesPage({
   onBackToDashboard,
   onLogout,
+  onOpenCustomers,
   session,
 }: MessagesPageProps) {
   const [query, setQuery] = useState('')
@@ -199,7 +201,7 @@ export function MessagesPage({
         <nav className="space-y-2">
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
-            onClick={onBackToDashboard}
+            onClick={onOpenCustomers}
             type="button"
           >
             <LayoutDashboard size={18} />
