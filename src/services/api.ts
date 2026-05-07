@@ -56,18 +56,20 @@ api.interceptors.request.use((config) => {
 
 export const authApi = {
   async login(payload: LoginPayload) {
-    if (payload.password === '123456') {
-      return {
-        token: 'demo-admin-token',
-        user: {
-          name: 'MikiJapan Admin',
-          email: payload.email,
-        },
-      } satisfies AuthSession
-    }
+    try {
+      const { data } = await api.post<AuthSession>('/auth/login', payload)
+      return data
+    } catch (error) {
+      if (axios.isAxiosError<{ message?: string }>(error)) {
+        throw new Error(
+          error.response?.data?.message ??
+            'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง',
+          { cause: error },
+        )
+      }
 
-    const { data } = await api.post<AuthSession>('/auth/login', payload)
-    return data
+      throw error
+    }
   },
 }
 

@@ -7,11 +7,9 @@ type LoginPageProps = {
   onLogin: (session: AuthSession) => void
 }
 
-const ADMIN_PASSWORD = '123456'
-
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [payload, setPayload] = useState<LoginPayload>({
-    email: 'admin@mikijapan.co',
+    email: 'admin@mikijapan.local',
     password: '',
   })
   const [error, setError] = useState('')
@@ -26,17 +24,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       return
     }
 
-    if (payload.password !== ADMIN_PASSWORD) {
-      setError('รหัสผ่านไม่ถูกต้อง')
-      return
-    }
-
     try {
       setIsLoading(true)
       const nextSession = await authApi.login(payload)
       onLogin(nextSession)
-    } catch {
-      setError('เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง')
+    } catch (error) {
+      setError(
+        error instanceof Error && error.message
+          ? error.message
+          : 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง',
+      )
     } finally {
       setIsLoading(false)
     }
@@ -106,7 +103,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   email: event.target.value,
                 }))
               }
-              placeholder="admin@mikijapan.co"
+              placeholder="admin@mikijapan.local"
               type="email"
               value={payload.email}
             />
