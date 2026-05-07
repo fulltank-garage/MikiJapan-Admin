@@ -10,6 +10,7 @@ import {
   Menu,
   Phone,
   Search,
+  Trash2,
   UserRound,
   UsersRound,
   XCircle,
@@ -156,6 +157,36 @@ export function MessagesPage({
       setNotice(status === 'approved' ? 'ยืนยันการสมัครแล้ว' : 'ปฏิเสธการสมัครแล้ว')
     } catch {
       setNotice('อัปเดตสถานะการสมัครไม่สำเร็จ')
+    }
+  }
+
+  const deleteSelectedApplication = async () => {
+    if (!selectedApplication) {
+      return
+    }
+
+    const shouldDelete = window.confirm(
+      'ต้องการลบข้อมูลการสมัครนี้ใช่ไหม? Rich Menu ของลูกค้าจะเปลี่ยนกลับเป็น Register',
+    )
+    if (!shouldDelete) {
+      return
+    }
+
+    setNotice('')
+
+    try {
+      if (isApiConfigured) {
+        await applicationApi.remove(selectedApplication.id)
+      }
+
+      const nextApplications = customerApplications.filter(
+        (application) => application.id !== selectedApplication.id,
+      )
+      setCustomerApplications(nextApplications)
+      setSelectedApplicationId(nextApplications[0]?.id || '')
+      setNotice('ลบข้อมูลการสมัครแล้ว และเปลี่ยน Rich Menu กลับเป็น Register')
+    } catch {
+      setNotice('ลบข้อมูลการสมัครไม่สำเร็จ')
     }
   }
 
@@ -363,6 +394,14 @@ export function MessagesPage({
                         >
                           <XCircle size={17} />
                           ปฏิเสธการสมัคร
+                        </button>
+                        <button
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8]"
+                          onClick={deleteSelectedApplication}
+                          type="button"
+                        >
+                          <Trash2 size={17} />
+                          ลบข้อมูล
                         </button>
                       </div>
                     </div>

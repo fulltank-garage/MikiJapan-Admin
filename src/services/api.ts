@@ -122,4 +122,8 @@ export const applicationApi = {
     )
     return data
   },
+
+  async remove(id: string) {
+    await api.delete(`/members/${id}`)
+  },
 }
