@@ -14,23 +14,16 @@ import {
   UsersRound,
   XCircle,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
-import type { AuthSession } from '../services/api'
-
-type ApplicationStatus = 'pending' | 'approved' | 'rejected'
-
-type CustomerApplication = {
-  id: string
-  fullName: string
-  nickname: string
-  phone: string
-  citizenId: string
-  storeImageUrl: string
-  storePageLink: string
-  status: ApplicationStatus
-}
+import {
+  applicationApi,
+  isApiConfigured,
+  type ApplicationStatus,
+  type AuthSession,
+  type MemberApplication,
+} from '../services/api'
 
 type MessagesPageProps = {
   onBackToDashboard: () => void
@@ -38,53 +31,6 @@ type MessagesPageProps = {
   onOpenCustomers: () => void
   session: AuthSession
 }
-
-const applications: CustomerApplication[] = [
-  {
-    id: 'app-1001',
-    fullName: 'Sakura Tanaka',
-    nickname: 'Sakura',
-    phone: '+81 90 1122 4588',
-    citizenId: '1101700458899',
-    storeImageUrl:
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80',
-    storePageLink: 'https://facebook.com/sakura.store',
-    status: 'pending',
-  },
-  {
-    id: 'app-1002',
-    fullName: 'Nattapong Srisawat',
-    nickname: 'Pong',
-    phone: '+66 81 445 9081',
-    citizenId: '1103700459081',
-    storeImageUrl:
-      'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=900&q=80',
-    storePageLink: 'https://facebook.com/pong.market',
-    status: 'pending',
-  },
-  {
-    id: 'app-1003',
-    fullName: 'Mika Kobayashi',
-    nickname: 'Mika',
-    phone: '+81 80 7720 1190',
-    citizenId: '1105700772119',
-    storeImageUrl:
-      'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&w=900&q=80',
-    storePageLink: 'https://facebook.com/mika.select',
-    status: 'approved',
-  },
-  {
-    id: 'app-1004',
-    fullName: 'Chanita Prasert',
-    nickname: 'Nan',
-    phone: '+66 92 780 4412',
-    citizenId: '1109700784412',
-    storeImageUrl:
-      'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=900&q=80',
-    storePageLink: 'https://facebook.com/nan.beauty',
-    status: 'rejected',
-  },
-]
 
 const statusMeta: Record<
   ApplicationStatus,
@@ -107,6 +53,12 @@ const statusMeta: Record<
   },
 }
 
+const getApplicationFullName = (application: MemberApplication) =>
+  `${application.firstName} ${application.lastName}`.trim()
+
+const getStorefrontImageUrl = (application: MemberApplication) =>
+  application.storefrontImageUrl || application.storefrontImage || ''
+
 export function MessagesPage({
   onBackToDashboard,
   onLogout,
@@ -114,12 +66,44 @@ export function MessagesPage({
   session,
 }: MessagesPageProps) {
   const [customerApplications, setCustomerApplications] =
-    useState(applications)
+    useState<MemberApplication[]>([])
   const [query, setQuery] = useState('')
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [selectedApplicationId, setSelectedApplicationId] = useState(
-    customerApplications[0].id,
-  )
+  const [selectedApplicationId, setSelectedApplicationId] = useState('')
+  const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadApplications = async () => {
+      setIsLoadingApplications(true)
+      setNotice('')
+
+      try {
+        const data = isApiConfigured ? await applicationApi.list() : []
+
+        if (isMounted) {
+          setCustomerApplications(data)
+          setSelectedApplicationId((current) => current || data[0]?.id || '')
+        }
+      } catch {
+        if (isMounted) {
+          setNotice('โหลดข้อมูลการสมัครจาก API ไม่สำเร็จ')
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingApplications(false)
+        }
+      }
+    }
+
+    loadApplications()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -130,11 +114,12 @@ export function MessagesPage({
 
     return customerApplications.filter((application) =>
       [
-        application.fullName,
+        application.firstName,
+        application.lastName,
         application.nickname,
         application.phone,
         application.citizenId,
-        application.storePageLink,
+        application.shopPageUrl,
       ]
         .join(' ')
         .toLowerCase()
@@ -147,16 +132,31 @@ export function MessagesPage({
       (application) => application.id === selectedApplicationId,
     ) ||
     filteredApplications[0] ||
-    customerApplications[0]
+    null
 
-  const updateApplicationStatus = (status: ApplicationStatus) => {
-    setCustomerApplications((current) =>
-      current.map((application) =>
-        application.id === selectedApplication.id
-          ? { ...application, status }
-          : application,
-      ),
-    )
+  const updateApplicationStatus = async (status: ApplicationStatus) => {
+    if (!selectedApplication) {
+      return
+    }
+
+    setNotice('')
+
+    try {
+      const updatedApplication = isApiConfigured
+        ? await applicationApi.updateStatus(selectedApplication.id, status)
+        : { ...selectedApplication, status }
+
+      setCustomerApplications((current) =>
+        current.map((application) =>
+          application.id === selectedApplication.id
+            ? updatedApplication
+            : application,
+        ),
+      )
+      setNotice(status === 'approved' ? 'ยืนยันการสมัครแล้ว' : 'ปฏิเสธการสมัครแล้ว')
+    } catch {
+      setNotice('อัปเดตสถานะการสมัครไม่สำเร็จ')
+    }
   }
 
   return (
@@ -267,7 +267,9 @@ export function MessagesPage({
                   รายการสมัคร
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {filteredApplications.length} รายการ
+                  {isLoadingApplications
+                    ? 'กำลังโหลดข้อมูล'
+                    : `${filteredApplications.length} รายการ`}
                 </p>
               </div>
 
@@ -301,13 +303,13 @@ export function MessagesPage({
                     >
                       <div className="flex items-center gap-3">
                         <img
-                          alt={`หน้าร้านของ ${application.fullName}`}
+                          alt={`หน้าร้านของ ${getApplicationFullName(application)}`}
                           className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
-                          src={application.storeImageUrl}
+                          src={getStorefrontImageUrl(application)}
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-semibold text-slate-950">
-                            {application.fullName}
+                            {getApplicationFullName(application)}
                           </p>
                           <p className="mt-1 truncate text-sm text-slate-500">
                             {application.nickname} · {application.phone}
@@ -320,82 +322,109 @@ export function MessagesPage({
 
                   {filteredApplications.length === 0 ? (
                     <div className="px-5 py-10 text-center text-sm text-slate-500">
-                      ไม่พบข้อมูลการสมัคร
+                      {isLoadingApplications
+                        ? 'กำลังโหลดข้อมูลการสมัคร'
+                        : 'ไม่พบข้อมูลการสมัคร'}
                     </div>
                   ) : null}
                 </div>
               </div>
 
               <article className="p-5">
-                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-[#8f6847]">
-                      Application Detail
-                    </p>
-                    <h2 className="mt-1 text-xl font-semibold text-slate-950">
-                      {selectedApplication.fullName}
-                    </h2>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <ApplicationStatusBadge
-                      status={selectedApplication.status}
-                    />
-                    <button
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
-                      disabled={selectedApplication.status === 'approved'}
-                      onClick={() => updateApplicationStatus('approved')}
-                      type="button"
-                    >
-                      <CheckCircle2 size={17} />
-                      ยืนยันการสมัคร
-                    </button>
-                    <button
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
-                      disabled={selectedApplication.status === 'rejected'}
-                      onClick={() => updateApplicationStatus('rejected')}
-                      type="button"
-                    >
-                      <XCircle size={17} />
-                      ปฏิเสธการสมัคร
-                    </button>
-                  </div>
-                </div>
+                {selectedApplication ? (
+                  <>
+                    <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-[#8f6847]">
+                          Application Detail
+                        </p>
+                        <h2 className="mt-1 text-xl font-semibold text-slate-950">
+                          {getApplicationFullName(selectedApplication)}
+                        </h2>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ApplicationStatusBadge
+                          status={selectedApplication.status}
+                        />
+                        <button
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
+                          disabled={selectedApplication.status === 'approved'}
+                          onClick={() => updateApplicationStatus('approved')}
+                          type="button"
+                        >
+                          <CheckCircle2 size={17} />
+                          ยืนยันการสมัคร
+                        </button>
+                        <button
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
+                          disabled={selectedApplication.status === 'rejected'}
+                          onClick={() => updateApplicationStatus('rejected')}
+                          type="button"
+                        >
+                          <XCircle size={17} />
+                          ปฏิเสธการสมัคร
+                        </button>
+                      </div>
+                    </div>
 
-                <div className="mb-5 overflow-hidden rounded-lg border border-[#ead8c7] bg-[#fff8f1]">
-                  <img
-                    alt={`รูปหน้าร้านของ ${selectedApplication.fullName}`}
-                    className="h-56 w-full object-cover sm:h-72"
-                    src={selectedApplication.storeImageUrl}
-                  />
-                </div>
+                    {notice ? (
+                      <p className="mb-4 rounded-lg border border-[#ead8c7] bg-[#fff8f1] px-4 py-3 text-sm font-medium text-[#8f6847]">
+                        {notice}
+                      </p>
+                    ) : null}
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <InfoItem
-                    icon={UserRound}
-                    label="ชื่อนามสกุล"
-                    value={selectedApplication.fullName}
-                  />
-                  <InfoItem
-                    icon={UserRound}
-                    label="ชื่อเล่น"
-                    value={selectedApplication.nickname}
-                  />
-                  <InfoItem
-                    icon={Phone}
-                    label="เบอร์โทร"
-                    value={selectedApplication.phone}
-                  />
-                  <InfoItem
-                    icon={IdCard}
-                    label="เลขบัตรประชาชน"
-                    value={selectedApplication.citizenId}
-                  />
-                  <LinkItem
-                    icon={Link2}
-                    label="ลิงก์ร้าน/เพจ"
-                    value={selectedApplication.storePageLink}
-                  />
-                </div>
+                    <div className="mb-5 overflow-hidden rounded-lg border border-[#ead8c7] bg-[#fff8f1]">
+                      {getStorefrontImageUrl(selectedApplication) ? (
+                        <img
+                          alt={`รูปหน้าร้านของ ${getApplicationFullName(selectedApplication)}`}
+                          className="h-56 w-full object-cover sm:h-72"
+                          src={getStorefrontImageUrl(selectedApplication)}
+                        />
+                      ) : (
+                        <div className="grid h-56 place-items-center px-5 text-center text-sm text-slate-500 sm:h-72">
+                          ไม่มีรูปหน้าร้าน
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <InfoItem
+                        icon={UserRound}
+                        label="ชื่อ"
+                        value={selectedApplication.firstName}
+                      />
+                      <InfoItem
+                        icon={UserRound}
+                        label="นามสกุล"
+                        value={selectedApplication.lastName}
+                      />
+                      <InfoItem
+                        icon={UserRound}
+                        label="ชื่อเล่น"
+                        value={selectedApplication.nickname}
+                      />
+                      <InfoItem
+                        icon={Phone}
+                        label="เบอร์โทร"
+                        value={selectedApplication.phone}
+                      />
+                      <InfoItem
+                        icon={IdCard}
+                        label="เลขบัตรประชาชน"
+                        value={selectedApplication.citizenId}
+                      />
+                      <LinkItem
+                        icon={Link2}
+                        label="ลิงก์ร้าน"
+                        value={selectedApplication.shopPageUrl}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="grid min-h-80 place-items-center rounded-lg border border-[#ead8c7] bg-[#fff8f1] px-5 text-center text-sm text-slate-500">
+                    {notice || 'เลือกข้อมูลการสมัครเพื่อดูรายละเอียด'}
+                  </div>
+                )}
               </article>
             </div>
           </section>

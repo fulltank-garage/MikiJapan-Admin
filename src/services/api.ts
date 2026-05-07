@@ -17,6 +17,21 @@ export type Customer = {
   note: string
 }
 
+export type ApplicationStatus = 'pending' | 'approved' | 'rejected'
+
+export type MemberApplication = {
+  id: string
+  firstName: string
+  lastName: string
+  nickname: string
+  phone: string
+  citizenId: string
+  shopPageUrl: string
+  storefrontImage?: string
+  storefrontImageUrl?: string
+  status: ApplicationStatus
+}
+
 export type LoginPayload = {
   email: string
   password: string
@@ -91,5 +106,20 @@ export const customerApi = {
 
   async remove(id: string) {
     await api.delete(`/customers/${id}`)
+  },
+}
+
+export const applicationApi = {
+  async list() {
+    const { data } = await api.get<MemberApplication[]>('/members')
+    return data
+  },
+
+  async updateStatus(id: string, status: ApplicationStatus) {
+    const { data } = await api.patch<MemberApplication>(
+      `/members/${id}/status`,
+      { status },
+    )
+    return data
   },
 }
