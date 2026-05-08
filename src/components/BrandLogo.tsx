@@ -7,7 +7,7 @@ type BrandLogoProps = {
 
 export function BrandLogo({
   className = 'size-10',
-  title = 'Miki Japan - ADMIN logo',
+  title = 'Miki Japan logo',
 }: BrandLogoProps) {
   return (
     <img

@@ -120,7 +120,7 @@ export function MobileAdminMenu({
             <div className="flex items-center gap-3">
               <BrandLogo className="size-11 shrink-0" />
               <div>
-                <p className="text-lg font-semibold text-white">Miki Japan - ADMIN</p>
+                <p className="text-lg font-semibold text-white">Miki Japan</p>
               </div>
             </div>
             <button

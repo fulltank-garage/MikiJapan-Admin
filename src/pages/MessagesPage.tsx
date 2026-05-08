@@ -273,7 +273,7 @@ export function MessagesPage({
         <div className="mb-9 flex items-center gap-3">
           <BrandLogo className="size-11 shrink-0" />
           <div>
-            <p className="text-lg font-semibold">Miki Japan - ADMIN</p>
+            <p className="text-lg font-semibold">Miki Japan</p>
           </div>
         </div>
 
@@ -351,17 +351,17 @@ export function MessagesPage({
           </div>
         </header>
 
-        <main className="max-w-full overflow-x-hidden px-4 py-6 sm:px-6 xl:px-8">
+        <main className="max-w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-5 xl:px-8">
           <section className="max-w-full overflow-hidden rounded-2xl border border-[#ead8c7] bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
-                  รายการสมัคร
+                  รายการรอตรวจสอบ
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {isLoadingApplications
                     ? 'กำลังโหลดข้อมูล'
-                    : `${filteredApplications.length} รายการ`}
+                    : `${filteredApplications.length} รายการที่ต้องจัดการ`}
                 </p>
               </div>
 
@@ -379,14 +379,14 @@ export function MessagesPage({
               </label>
             </div>
 
-            <div className="grid min-h-[34rem] lg:grid-cols-[minmax(320px,0.82fr)_1.18fr]">
+            <div className="grid lg:min-h-[34rem] lg:grid-cols-[minmax(320px,0.75fr)_minmax(0,1.25fr)]">
               <div className="border-b border-[#ead8c7] lg:border-b-0 lg:border-r">
-                <div className="max-h-[34rem] divide-y divide-[#ead8c7] overflow-y-auto lg:max-h-[calc(100dvh-14rem)]">
+                <div className="max-h-[18rem] divide-y divide-[#ead8c7] overflow-y-auto sm:max-h-[24rem] lg:max-h-[calc(100dvh-14rem)]">
                   {filteredApplications.map((application) => (
                     <button
-                      className={`block w-full min-w-0 px-4 py-4 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
+                      className={`block w-full min-w-0 px-4 py-3 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
                         selectedApplication?.id === application.id
-                          ? 'bg-[#fbf1e7]/70'
+                          ? 'bg-[#fbf1e7]/80 shadow-[inset_4px_0_0_#9a7655]'
                           : ''
                       }`}
                       key={application.id}
@@ -409,7 +409,7 @@ export function MessagesPage({
                   ))}
 
                   {filteredApplications.length === 0 ? (
-                    <div className="px-5 py-10 text-center text-sm text-slate-500">
+                    <div className="px-5 py-8 text-center text-sm text-slate-500">
                       {isLoadingApplications
                         ? 'กำลังโหลดข้อมูลการสมัคร'
                         : 'ไม่พบข้อมูลการสมัคร'}
@@ -418,75 +418,90 @@ export function MessagesPage({
                 </div>
               </div>
 
-              <article className="min-w-0 p-5">
+              <article className="min-w-0 p-4 sm:p-5">
                 {selectedApplication ? (
                   <>
-                    <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-                      <button
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
-                        disabled={selectedApplication.status === 'approved'}
-                        onClick={() => updateApplicationStatus('approved')}
-                        type="button"
-                      >
-                        <CheckCircle2 size={17} />
-                        ยืนยันการสมัคร
-                      </button>
-                      <button
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
-                        disabled={selectedApplication.status === 'rejected'}
-                        onClick={() => updateApplicationStatus('rejected')}
-                        type="button"
-                      >
-                        <XCircle size={17} />
-                        ปฏิเสธการสมัคร
-                      </button>
-                    </div>
-
-                    <div className="mb-5 overflow-hidden rounded-2xl border border-[#ead8c7] bg-[#fff8f1]">
-                      {getStorefrontImageUrl(selectedApplication) ? (
-                        <img
-                          alt={`รูปหน้าร้านของ ${getApplicationFullName(selectedApplication)}`}
-                          className="h-56 w-full object-cover sm:h-72"
-                          src={getStorefrontImageUrl(selectedApplication)}
+                    <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <ApplicationThumb
+                          application={selectedApplication}
+                          className="size-14"
+                          iconSize={22}
                         />
-                      ) : (
-                        <div className="grid h-56 place-items-center px-5 text-center text-sm text-slate-500 sm:h-72">
-                          ไม่มีรูปหน้าร้าน
+                        <div className="min-w-0">
+                          <p className="truncate text-lg font-semibold text-slate-950">
+                            {getApplicationFullName(selectedApplication)}
+                          </p>
+                          <p className="mt-0.5 truncate text-sm text-slate-500">
+                            {selectedApplication.nickname} ·{' '}
+                            {selectedApplication.phone}
+                          </p>
                         </div>
-                      )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+                        <button
+                          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
+                          disabled={selectedApplication.status === 'approved'}
+                          onClick={() => updateApplicationStatus('approved')}
+                          type="button"
+                        >
+                          <CheckCircle2 size={17} />
+                          <span className="hidden sm:inline">
+                            ยืนยันการสมัคร
+                          </span>
+                          <span className="sm:hidden">ยืนยัน</span>
+                        </button>
+                        <button
+                          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
+                          disabled={selectedApplication.status === 'rejected'}
+                          onClick={() => updateApplicationStatus('rejected')}
+                          type="button"
+                        >
+                          <XCircle size={17} />
+                          <span className="hidden sm:inline">
+                            ปฏิเสธการสมัคร
+                          </span>
+                          <span className="sm:hidden">ปฏิเสธ</span>
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <InfoItem
-                        icon={UserRound}
-                        label="ชื่อ"
-                        value={selectedApplication.firstName}
-                      />
-                      <InfoItem
-                        icon={UserRound}
-                        label="นามสกุล"
-                        value={selectedApplication.lastName}
-                      />
-                      <InfoItem
-                        icon={UserRound}
-                        label="ชื่อเล่น"
-                        value={selectedApplication.nickname}
-                      />
-                      <InfoItem
-                        icon={Phone}
-                        label="เบอร์โทร"
-                        value={selectedApplication.phone}
-                      />
-                      <InfoItem
-                        icon={IdCard}
-                        label="เลขบัตรประชาชน"
-                        value={selectedApplication.citizenId}
-                      />
-                      <LinkItem
-                        icon={Link2}
-                        label="ลิงก์ร้าน"
-                        value={selectedApplication.shopPageUrl}
-                      />
+                    <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+                      <StorefrontPreview application={selectedApplication} />
+
+                      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                        <InfoItem
+                          icon={UserRound}
+                          label="ชื่อ"
+                          value={selectedApplication.firstName}
+                        />
+                        <InfoItem
+                          icon={UserRound}
+                          label="นามสกุล"
+                          value={selectedApplication.lastName}
+                        />
+                        <InfoItem
+                          icon={UserRound}
+                          label="ชื่อเล่น"
+                          value={selectedApplication.nickname}
+                        />
+                        <InfoItem
+                          icon={Phone}
+                          label="เบอร์โทร"
+                          value={selectedApplication.phone}
+                        />
+                        <InfoItem
+                          icon={IdCard}
+                          label="เลขบัตรประชาชน"
+                          value={selectedApplication.citizenId}
+                        />
+                        <LinkItem
+                          icon={Link2}
+                          label="ลิงก์ร้าน"
+                          value={selectedApplication.shopPageUrl}
+                        />
+                      </div>
                     </div>
                   </>
                 ) : (
@@ -511,52 +526,62 @@ type InfoItemProps = {
 
 function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
   return (
-    <div className="rounded-2xl border border-[#ead8c7] bg-[#fff8f1] p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
-        <Icon size={17} />
-        {label}
+    <div className="min-w-0 rounded-2xl border border-[#ead8c7] bg-[#fff8f1] px-3 py-2.5">
+      <div className="flex items-start gap-2">
+        <Icon className="mt-0.5 shrink-0 text-slate-500" size={16} />
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-slate-500">{label}</p>
+          <p className="mt-0.5 break-words text-sm font-semibold text-slate-950 sm:text-base">
+            {value || '-'}
+          </p>
+        </div>
       </div>
-      <p className="break-words text-base font-semibold text-slate-950">
-        {value}
-      </p>
     </div>
   )
 }
 
 function LinkItem({ icon: Icon, label, value }: InfoItemProps) {
   return (
-    <div className="min-w-0 rounded-2xl border border-[#ead8c7] bg-[#fff8f1] p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
-        <Icon size={17} />
-        {label}
+    <div className="min-w-0 rounded-2xl border border-[#ead8c7] bg-[#fff8f1] px-3 py-2.5 sm:col-span-2 xl:col-span-1">
+      <div className="flex items-start gap-2">
+        <Icon className="mt-0.5 shrink-0 text-slate-500" size={16} />
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium text-slate-500">{label}</p>
+          <a
+            className="mt-0.5 inline-flex w-full min-w-0 max-w-full items-center gap-2 text-sm font-semibold text-[#8f6847] hover:text-[#6f5238] sm:text-base"
+            href={value}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+              {value || '-'}
+            </span>
+            <ExternalLink className="shrink-0" size={15} />
+          </a>
+        </div>
       </div>
-      <a
-        className="inline-flex w-full min-w-0 max-w-full items-center gap-2 text-sm font-semibold text-[#8f6847] hover:text-[#6f5238]"
-        href={value}
-        rel="noreferrer"
-        target="_blank"
-      >
-        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-          {value}
-        </span>
-        <ExternalLink className="shrink-0" size={15} />
-      </a>
     </div>
   )
 }
 
 function ApplicationThumb({
   application,
+  className = 'size-12',
+  iconSize = 20,
 }: {
   application: MemberApplication
+  className?: string
+  iconSize?: number
 }) {
   const imageUrl = getStorefrontImageUrl(application)
   const [hasImageError, setHasImageError] = useState(false)
 
   if (!imageUrl || hasImageError) {
     return (
-      <div className="grid size-12 shrink-0 place-items-center rounded-2xl border border-[#ead8c7] bg-[#f3e8dd] text-slate-600">
-        <UserRound size={20} />
+      <div
+        className={`grid shrink-0 place-items-center rounded-2xl border border-[#ead8c7] bg-[#f3e8dd] text-slate-600 ${className}`}
+      >
+        <UserRound size={iconSize} />
       </div>
     )
   }
@@ -564,10 +589,49 @@ function ApplicationThumb({
   return (
     <img
       alt={`หน้าร้านของ ${getApplicationFullName(application)}`}
-      className="size-12 shrink-0 rounded-2xl border border-[#ead8c7] object-cover"
+      className={`shrink-0 rounded-2xl border border-[#ead8c7] object-cover ${className}`}
       onError={() => setHasImageError(true)}
       src={imageUrl}
     />
+  )
+}
+
+function StorefrontPreview({
+  application,
+}: {
+  application: MemberApplication
+}) {
+  const imageUrl = getStorefrontImageUrl(application)
+
+  return (
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-[#ead8c7] bg-[#fff8f1]">
+      <div className="flex items-center justify-between gap-3 px-3 py-2.5">
+        <p className="text-sm font-semibold text-[#6f5238]">รูปหน้าร้าน</p>
+        {imageUrl ? (
+          <a
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8f6847] hover:text-[#6f5238]"
+            href={imageUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            เปิดรูป
+            <ExternalLink size={13} />
+          </a>
+        ) : null}
+      </div>
+
+      {imageUrl ? (
+        <img
+          alt={`รูปหน้าร้านของ ${getApplicationFullName(application)}`}
+          className="h-40 w-full object-cover sm:h-52 lg:h-56 xl:h-full xl:min-h-80"
+          src={imageUrl}
+        />
+      ) : (
+        <div className="grid h-40 place-items-center px-5 text-center text-sm text-slate-500 sm:h-52 lg:h-56 xl:h-80">
+          ไม่มีรูปหน้าร้าน
+        </div>
+      )}
+    </div>
   )
 }
 

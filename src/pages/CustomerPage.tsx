@@ -214,7 +214,7 @@ export function CustomerPage({
         <div className="mb-9 flex items-center gap-3">
           <BrandLogo className="size-11 shrink-0" />
           <div>
-            <p className="text-lg font-semibold">Miki Japan - ADMIN</p>
+            <p className="text-lg font-semibold">Miki Japan</p>
           </div>
         </div>
 
