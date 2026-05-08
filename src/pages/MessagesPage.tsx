@@ -255,7 +255,7 @@ export function MessagesPage({
   }
 
   return (
-    <div className="min-h-dvh bg-[#fbf6f0] text-slate-900">
+    <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
       <Snackbar message={notice} onClose={() => setNotice('')} />
 
       <MobileAdminMenu
@@ -325,10 +325,10 @@ export function MessagesPage({
         </div>
       </aside>
 
-      <div className="xl:pl-72">
-        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+      <div className="max-w-full overflow-x-hidden xl:pl-72">
+        <header className="sticky top-0 z-20 max-w-full border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
@@ -339,11 +339,11 @@ export function MessagesPage({
               >
                 <Menu size={20} />
               </button>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-[#8f6847]">
                   ข้อมูลการสมัคร
                 </p>
-                <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
+                <h1 className="break-words text-xl font-semibold text-slate-950 sm:text-2xl">
                   ข้อมูลการสมัครของลูกค้า
                 </h1>
               </div>
@@ -352,8 +352,8 @@ export function MessagesPage({
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 xl:px-8">
-          <section className="rounded-lg border border-[#ead8c7] bg-white shadow-sm">
+        <main className="max-w-full overflow-x-hidden px-4 py-6 sm:px-6 xl:px-8">
+          <section className="max-w-full overflow-hidden rounded-lg border border-[#ead8c7] bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
@@ -385,7 +385,7 @@ export function MessagesPage({
                 <div className="max-h-[34rem] divide-y divide-[#ead8c7] overflow-y-auto lg:max-h-[calc(100dvh-14rem)]">
                   {filteredApplications.map((application) => (
                     <button
-                      className={`block w-full px-4 py-4 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
+                      className={`block w-full min-w-0 px-4 py-4 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
                         selectedApplication?.id === application.id
                           ? 'bg-[#fbf1e7]/70'
                           : ''
@@ -394,7 +394,7 @@ export function MessagesPage({
                       onClick={() => setSelectedApplicationId(application.id)}
                       type="button"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <ApplicationThumb application={application} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-semibold text-slate-950">
@@ -419,7 +419,7 @@ export function MessagesPage({
                 </div>
               </div>
 
-              <article className="p-5">
+              <article className="min-w-0 p-5">
                 {selectedApplication ? (
                   <>
                     <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
@@ -526,18 +526,20 @@ function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
 
 function LinkItem({ icon: Icon, label, value }: InfoItemProps) {
   return (
-    <div className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-4">
+    <div className="min-w-0 rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
         <Icon size={17} />
         {label}
       </div>
       <a
-        className="inline-flex max-w-full items-center gap-2 break-all text-sm font-semibold text-[#8f6847] hover:text-[#6f5238]"
+        className="inline-flex w-full min-w-0 max-w-full items-center gap-2 text-sm font-semibold text-[#8f6847] hover:text-[#6f5238]"
         href={value}
         rel="noreferrer"
         target="_blank"
       >
-        <span>{value}</span>
+        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+          {value}
+        </span>
         <ExternalLink className="shrink-0" size={15} />
       </a>
     </div>

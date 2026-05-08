@@ -179,7 +179,7 @@ export function CustomerDashboardPage({
   }, [customers, pendingApplicationCount])
 
   return (
-    <div className="min-h-dvh bg-[#fbf6f0] text-slate-900">
+    <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
       <Snackbar message={notice} onClose={() => setNotice('')} />
 
       <MobileAdminMenu
@@ -246,10 +246,10 @@ export function CustomerDashboardPage({
         </div>
       </aside>
 
-      <div className="xl:pl-72">
-        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+      <div className="max-w-full overflow-x-hidden xl:pl-72">
+        <header className="sticky top-0 z-20 max-w-full border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
@@ -260,11 +260,11 @@ export function CustomerDashboardPage({
               >
                 <Menu size={20} />
               </button>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-[#8f6847]">
                   ภาพรวมลูกค้า
                 </p>
-                <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
+                <h1 className="break-words text-xl font-semibold text-slate-950 sm:text-2xl">
                   แดชบอร์ดจัดการลูกค้า
                 </h1>
               </div>
@@ -273,7 +273,7 @@ export function CustomerDashboardPage({
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 xl:px-8">
+        <main className="max-w-full overflow-x-hidden px-4 py-6 sm:px-6 xl:px-8">
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {stats.map((item) => {
               const Icon = item.icon

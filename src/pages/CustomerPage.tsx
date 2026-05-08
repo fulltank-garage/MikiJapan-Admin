@@ -202,7 +202,7 @@ export function CustomerPage({
   }
 
   return (
-    <div className="min-h-dvh bg-[#fbf6f0] text-slate-900">
+    <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
       <Snackbar message={notice} onClose={() => setNotice('')} />
 
       <MobileAdminMenu
@@ -269,10 +269,10 @@ export function CustomerPage({
         </div>
       </aside>
 
-      <div className="xl:pl-72">
-        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+      <div className="max-w-full overflow-x-hidden xl:pl-72">
+        <header className="sticky top-0 z-20 max-w-full border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
@@ -283,11 +283,11 @@ export function CustomerPage({
               >
                 <Menu size={20} />
               </button>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-[#8f6847]">
                   ลูกค้าที่ผ่านการยืนยัน
                 </p>
-                <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
+                <h1 className="break-words text-xl font-semibold text-slate-950 sm:text-2xl">
                   จัดการข้อมูลลูกค้า
                 </h1>
               </div>
@@ -296,7 +296,7 @@ export function CustomerPage({
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 xl:px-8">
+        <main className="max-w-full overflow-x-hidden px-4 py-6 sm:px-6 xl:px-8">
           <section className="grid gap-4 md:grid-cols-3">
             <SummaryCard
               label="ลูกค้าที่เป็น Member"
@@ -312,7 +312,7 @@ export function CustomerPage({
             />
           </section>
 
-          <section className="mt-6 rounded-lg border border-[#ead8c7] bg-white shadow-sm">
+          <section className="mt-6 max-w-full overflow-hidden rounded-lg border border-[#ead8c7] bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
@@ -371,7 +371,7 @@ function CustomerTable({
 }: CustomerTableProps) {
   return (
     <>
-      <div className="hidden overflow-x-auto md:block">
+      <div className="hidden overflow-x-auto lg:block">
         <table className="w-full min-w-[900px] border-collapse text-left">
           <thead className="bg-[#fff8f1] text-xs font-semibold uppercase text-slate-500">
             <tr>
@@ -436,7 +436,7 @@ function CustomerTable({
         </table>
       </div>
 
-      <div className="grid gap-3 p-4 md:hidden">
+      <div className="grid gap-3 p-4 lg:hidden">
         {isLoading ? (
           <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
             กำลังโหลดข้อมูลลูกค้า
@@ -452,10 +452,10 @@ function CustomerTable({
         {!isLoading &&
           customers.map((customer) => (
             <article
-              className="rounded-lg border border-[#ead8c7] bg-white p-4 shadow-sm"
+              className="min-w-0 overflow-hidden rounded-lg border border-[#ead8c7] bg-white p-4 shadow-sm"
               key={customer.id}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex min-w-0 items-start gap-3">
                 <StorefrontThumb customer={customer} />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-slate-950">
@@ -472,7 +472,7 @@ function CustomerTable({
                 />
               </div>
 
-              <div className="mt-4 grid gap-2 text-sm">
+              <div className="mt-4 grid min-w-0 gap-2 text-sm">
                 <p className="break-words text-slate-700">
                   เลขบัตรประชาชน: {customer.citizenId}
                 </p>
@@ -529,12 +529,14 @@ function StorefrontThumb({ customer }: { customer: MemberApplication }) {
 function CustomerShopLink({ value }: { value: string }) {
   return (
     <a
-      className="inline-flex max-w-full items-center gap-2 break-all font-medium text-[#8f6847] hover:text-[#6f5238]"
+      className="inline-flex w-full min-w-0 max-w-full items-center gap-2 font-medium text-[#8f6847] hover:text-[#6f5238]"
       href={value}
       rel="noreferrer"
       target="_blank"
     >
-      <span className="min-w-0 truncate md:max-w-56 xl:max-w-64">{value}</span>
+      <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap lg:max-w-56 xl:max-w-64">
+        {value}
+      </span>
       <ExternalLink className="shrink-0" size={14} />
     </a>
   )

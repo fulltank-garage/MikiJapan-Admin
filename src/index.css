@@ -13,14 +13,25 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
+  position: relative;
+  width: 100%;
   min-width: 320px;
+  max-width: 100vw;
   min-height: 100vh;
   margin: 0;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
   background:
     linear-gradient(180deg, rgba(251, 246, 240, 0.94), #f4e7d9 44rem),
     #fbf6f0;
@@ -38,5 +49,8 @@ button {
 }
 
 #root {
+  width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
+  overflow-x: clip;
 }
