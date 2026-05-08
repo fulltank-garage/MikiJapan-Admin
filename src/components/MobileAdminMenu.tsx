@@ -4,6 +4,7 @@ import {
   UsersRound,
   X,
 } from 'lucide-react'
+import { useEffect } from 'react'
 import { BrandLogo } from './BrandLogo'
 import type { AuthSession } from '../services/api'
 
@@ -42,6 +43,8 @@ const navItems = [
   icon: typeof LayoutDashboard
 }>
 
+const menuTransitionMs = 260
+
 export function MobileAdminMenu({
   activePage,
   isOpen,
@@ -52,9 +55,26 @@ export function MobileAdminMenu({
   pendingApplicationCount = 0,
   session,
 }: MobileAdminMenuProps) {
-  if (!isOpen) {
-    return null
-  }
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const originalOverflow = document.body.style.overflow
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen, onClose])
 
   const actions: Record<AdminPageKey, () => void> = {
     dashboard: onOpenDashboard,
@@ -63,18 +83,39 @@ export function MobileAdminMenu({
   }
 
   const handleNavigate = (key: AdminPageKey) => {
-    actions[key]()
     onClose()
+
+    if (key === activePage) {
+      return
+    }
+
+    window.setTimeout(() => actions[key](), menuTransitionMs)
   }
 
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-[#3f2e23]/60 backdrop-blur-sm xl:hidden"
+      aria-hidden={!isOpen}
+      className={`fixed inset-0 z-50 overflow-hidden xl:hidden ${
+        isOpen ? 'pointer-events-auto' : 'pointer-events-none'
+      }`}
       role="dialog"
     >
-      <div className="flex min-h-full">
-        <aside className="flex max-h-dvh w-[min(21rem,88vw)] flex-col overflow-y-auto bg-[#6f5238] px-5 py-5 text-white shadow-2xl">
+      <button
+        aria-label="ปิดเมนู"
+        className={`absolute inset-0 bg-[#3f2e23]/60 transition-opacity duration-200 ease-out ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
+        onClick={onClose}
+        type="button"
+      />
+
+      <div className="relative flex min-h-full">
+        <aside
+          className={`flex max-h-dvh w-[min(21rem,88vw)] origin-left flex-col overflow-y-auto bg-[#6f5238] px-5 py-5 text-white shadow-2xl transition-transform duration-300 ease-out will-change-transform ${
+            isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
           <div className="mb-8 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <BrandLogo className="size-11 shrink-0" />
@@ -132,12 +173,6 @@ export function MobileAdminMenu({
             </p>
           </div>
         </aside>
-        <button
-          aria-label="ปิดเมนู"
-          className="min-h-full flex-1"
-          onClick={onClose}
-          type="button"
-        />
       </div>
     </div>
   )
