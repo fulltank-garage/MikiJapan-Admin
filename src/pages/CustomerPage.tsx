@@ -19,6 +19,7 @@ import { Snackbar } from '../components/Snackbar'
 import {
   applicationApi,
   isApiConfigured,
+  memberApi,
   subscribeApplicationEvents,
   type AuthSession,
   type MemberApplicationEvent,
@@ -74,13 +75,12 @@ export function CustomerPage({
 
   const loadCustomers = useCallback(async () => {
     try {
-      const data = isApiConfigured ? await applicationApi.list() : []
-      const approvedCustomers = data.filter(
-        (application) => application.status === 'approved',
-      )
-      setCustomers(approvedCustomers)
+      const data = isApiConfigured ? await memberApi.list() : []
+      const applications = isApiConfigured ? await applicationApi.list() : []
+      setCustomers(data)
       setPendingApplicationCount(
-        data.filter((application) => application.status === 'pending').length,
+        applications.filter((application) => application.status === 'pending')
+          .length,
       )
     } catch {
       setNotice('โหลดข้อมูลลูกค้าจาก API ไม่สำเร็จ')
@@ -101,37 +101,41 @@ export function CustomerPage({
     return subscribeApplicationEvents({
       onStatus: setRealtimeStatus,
       onEvent: (event: MemberApplicationEvent) => {
-      try {
-        if (
-          event.type === 'member_application.updated' &&
-          event.data.status === 'approved'
-        ) {
-          setCustomers((current) => upsertCustomer(current, event.data))
-          setPendingApplicationCount((current) => Math.max(current - 1, 0))
-          return
-        }
+        try {
+          if (event.type === 'member_application.created') {
+            setPendingApplicationCount((current) => current + 1)
+            return
+          }
 
-        if (
-          event.type === 'member_application.deleted' ||
-          event.data.status !== 'approved'
-        ) {
-          setCustomers((current) =>
-            current.filter((customer) => customer.id !== event.data.id),
-          )
-          setPendingApplicationCount((current) =>
-            event.data.status === 'pending' || event.data.status === 'rejected'
-              ? Math.max(current - 1, 0)
-              : current,
-          )
-          return
-        }
+          if (
+            event.type === 'member_application.updated' &&
+            event.data.status === 'approved'
+          ) {
+            setCustomers((current) => upsertCustomer(current, event.data))
+            setPendingApplicationCount((current) => Math.max(current - 1, 0))
+            return
+          }
 
-        if (event.type === 'member_application.created') {
-          setPendingApplicationCount((current) => current + 1)
+          if (event.type === 'member_application.deleted') {
+            setCustomers((current) =>
+              current.filter((customer) => customer.id !== event.data.id),
+            )
+            setPendingApplicationCount((current) =>
+              event.data.status === 'pending' || event.data.status === 'rejected'
+                ? Math.max(current - 1, 0)
+                : current,
+            )
+            return
+          }
+
+          if (event.data.status !== 'approved') {
+            setCustomers((current) =>
+              current.filter((customer) => customer.id !== event.data.id),
+            )
+          }
+        } catch {
+          setNotice('รับข้อมูล realtime ไม่สำเร็จ')
         }
-      } catch {
-        setNotice('รับข้อมูล realtime ไม่สำเร็จ')
-      }
       },
     })
   }, [])
@@ -188,7 +192,7 @@ export function CustomerPage({
 
     try {
       if (isApiConfigured) {
-        await applicationApi.remove(customer.id)
+        await memberApi.remove(customer.id)
       }
 
       setCustomers((current) =>

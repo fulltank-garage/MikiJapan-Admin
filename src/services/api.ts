@@ -55,7 +55,8 @@ export type AuthSession = {
   }
 }
 
-const defaultApiBaseUrl = 'https://mikijapan-api-production.up.railway.app/api'
+const defaultApiBaseUrl =
+  'https://mikijapan-api-production-7e32.up.railway.app/api'
 const apiBaseUrl =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) || defaultApiBaseUrl
 
@@ -119,22 +120,33 @@ export const customerApi = {
   },
 }
 
-export const applicationApi = {
+export const memberApi = {
   async list() {
     const { data } = await api.get<MemberApplication[]>('/members')
     return data
   },
 
+  async remove(id: string) {
+    await api.delete(`/members/${id}`)
+  },
+}
+
+export const applicationApi = {
+  async list() {
+    const { data } = await api.get<MemberApplication[]>('/member-applications')
+    return data
+  },
+
   async updateStatus(id: string, status: ApplicationStatus) {
     const { data } = await api.patch<MemberApplication>(
-      `/members/${id}/status`,
+      `/member-applications/${id}/status`,
       { status },
     )
     return data
   },
 
   async remove(id: string) {
-    await api.delete(`/members/${id}`)
+    await api.delete(`/member-applications/${id}`)
   },
 }
 

@@ -1,6 +1,4 @@
 import {
-  CircleDollarSign,
-  ClipboardList,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -13,17 +11,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import { Snackbar } from '../components/Snackbar'
-import { customerSeed } from '../data/customerSeed'
 import {
   applicationApi,
-  customerApi,
   isApiConfigured,
+  memberApi,
   subscribeApplicationEvents,
   type AuthSession,
-  type Customer,
+  type MemberApplication,
   type MemberApplicationEvent,
 } from '../services/api'
-import { moneyFormatter, numberFormatter } from '../utils/formatters'
+import { numberFormatter } from '../utils/formatters'
 
 type CustomerDashboardPageProps = {
   onLogout: () => void
@@ -32,15 +29,30 @@ type CustomerDashboardPageProps = {
   session: AuthSession
 }
 
+const upsertCustomer = (
+  customers: MemberApplication[],
+  nextCustomer: MemberApplication,
+) => {
+  const existingIndex = customers.findIndex(
+    (customer) => customer.id === nextCustomer.id,
+  )
+
+  if (existingIndex === -1) {
+    return [nextCustomer, ...customers]
+  }
+
+  return customers.map((customer) =>
+    customer.id === nextCustomer.id ? nextCustomer : customer,
+  )
+}
+
 export function CustomerDashboardPage({
   onLogout,
   onOpenCustomers,
   onOpenMessages,
   session,
 }: CustomerDashboardPageProps) {
-  const [customers, setCustomers] = useState<Customer[]>(
-    isApiConfigured ? [] : customerSeed,
-  )
+  const [customers, setCustomers] = useState<MemberApplication[]>([])
   const [query, setQuery] = useState('')
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -67,14 +79,14 @@ export function CustomerDashboardPage({
 
     const loadCustomers = async () => {
       try {
-        const data = await customerApi.list()
+        const data = await memberApi.list()
 
         if (isMounted) {
           setCustomers(data)
         }
       } catch {
         if (isMounted) {
-          setNotice('เชื่อมต่อ API ไม่สำเร็จ แสดงข้อมูลตัวอย่างชั่วคราว')
+          setNotice('เชื่อมต่อ API ไม่สำเร็จ')
         }
       } finally {
         if (isMounted) {
@@ -102,20 +114,29 @@ export function CustomerDashboardPage({
     return subscribeApplicationEvents({
       onEvent: (event: MemberApplicationEvent) => {
         try {
+          if (
+            event.type === 'member_application.updated' &&
+            event.data.status === 'approved'
+          ) {
+            setCustomers((current) => upsertCustomer(current, event.data))
+            setPendingApplicationCount((current) => Math.max(current - 1, 0))
+            return
+          }
+
           if (event.type === 'member_application.created') {
             setPendingApplicationCount((current) => current + 1)
             return
           }
 
-          if (
-            event.type === 'member_application.updated' &&
-            event.data.status !== 'pending'
-          ) {
+          if (event.type === 'member_application.updated') {
             setPendingApplicationCount((current) => Math.max(current - 1, 0))
             return
           }
 
           if (event.type === 'member_application.deleted') {
+            setCustomers((current) =>
+              current.filter((customer) => customer.id !== event.data.id),
+            )
             setPendingApplicationCount((current) =>
               event.data.status === 'pending' || event.data.status === 'rejected'
                 ? Math.max(current - 1, 0)
@@ -134,10 +155,12 @@ export function CustomerDashboardPage({
 
     return customers.filter((customer) =>
       [
-        customer.name,
-        customer.email,
+        customer.firstName,
+        customer.lastName,
+        customer.nickname,
         customer.phone,
-        customer.country,
+        customer.citizenId,
+        customer.shopPageUrl,
       ]
         .join(' ')
         .toLowerCase()
@@ -146,38 +169,34 @@ export function CustomerDashboardPage({
   }, [customers, query])
 
   const stats = useMemo(() => {
-    const totalSpent = customers.reduce(
-      (sum, customer) => sum + customer.totalSpent,
-      0,
-    )
-    const totalOrders = customers.reduce(
-      (sum, customer) => sum + customer.totalOrders,
-      0,
-    )
+    const storefrontImageCount = customers.filter(
+      (customer) => customer.storefrontImageUrl || customer.storefrontImage,
+    ).length
+
     return [
       {
-        label: 'ลูกค้าทั้งหมด',
+        label: 'สมาชิกทั้งหมด',
         value: numberFormatter.format(customers.length),
-        helper: 'รายการในระบบ',
+        helper: 'ผ่านการยืนยันแล้ว',
         icon: UsersRound,
         className: 'bg-[#fbf1e7] text-[#8f6847]',
       },
       {
-        label: 'คำสั่งซื้อ',
-        value: numberFormatter.format(totalOrders),
-        helper: 'สะสมทุกลูกค้า',
-        icon: ClipboardList,
+        label: 'มีรูปหน้าร้าน',
+        value: numberFormatter.format(storefrontImageCount),
+        helper: 'แนบรูปประกอบข้อมูล',
+        icon: UserRound,
         className: 'bg-[#f7eadc] text-[#8f6847]',
       },
       {
-        label: 'ยอดใช้จ่าย',
-        value: moneyFormatter.format(totalSpent),
-        helper: 'มูลค่ารวม',
-        icon: CircleDollarSign,
+        label: 'รอตรวจสอบ',
+        value: numberFormatter.format(pendingApplicationCount),
+        helper: 'ใบสมัครใหม่',
+        icon: Mail,
         className: 'bg-[#f4e7d9] text-[#6f5238]',
       },
     ]
-  }, [customers])
+  }, [customers, pendingApplicationCount])
 
   return (
     <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
@@ -344,7 +363,7 @@ export function CustomerDashboardPage({
 }
 
 type CustomerTableProps = {
-  customers: Customer[]
+  customers: MemberApplication[]
   isLoading: boolean
 }
 
@@ -356,9 +375,8 @@ function CustomerTable({ customers, isLoading }: CustomerTableProps) {
           <tr>
             <th className="px-5 py-3">ลูกค้า</th>
             <th className="px-5 py-3">ติดต่อ</th>
-            <th className="px-5 py-3 text-right">คำสั่งซื้อ</th>
-            <th className="px-5 py-3 text-right">ยอดใช้จ่าย</th>
-            <th className="px-5 py-3">ติดต่อล่าสุด</th>
+            <th className="px-5 py-3">เลขบัตรประชาชน</th>
+            <th className="px-5 py-3">ลิงก์ร้าน</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[#ead8c7]">
@@ -366,7 +384,7 @@ function CustomerTable({ customers, isLoading }: CustomerTableProps) {
             <tr>
               <td
                 className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={5}
+                colSpan={4}
               >
                 กำลังโหลดข้อมูลลูกค้า
               </td>
@@ -377,7 +395,7 @@ function CustomerTable({ customers, isLoading }: CustomerTableProps) {
             <tr>
               <td
                 className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={5}
+                colSpan={4}
               >
                 ไม่พบข้อมูลที่ค้นหา
               </td>
@@ -397,28 +415,30 @@ function CustomerTable({ customers, isLoading }: CustomerTableProps) {
                     </div>
                     <div>
                       <p className="font-medium text-slate-950">
-                        {customer.name}
+                        {`${customer.firstName} ${customer.lastName}`.trim()}
                       </p>
                       <p className="mt-1 max-w-52 truncate text-sm text-slate-500">
-                        {customer.note}
+                        {customer.nickname}
                       </p>
                     </div>
                   </div>
                 </td>
                 <td className="px-5 py-4">
-                  <p className="text-sm text-slate-900">{customer.email}</p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {customer.phone}
-                  </p>
+                  <p className="text-sm text-slate-900">{customer.phone}</p>
+                  <p className="mt-1 text-sm text-slate-500">สมาชิก</p>
                 </td>
-                <td className="px-5 py-4 text-right text-sm text-slate-700">
-                  {numberFormatter.format(customer.totalOrders)}
-                </td>
-                <td className="px-5 py-4 text-right text-sm font-medium text-slate-950">
-                  {moneyFormatter.format(customer.totalSpent)}
+                <td className="px-5 py-4 text-sm text-slate-700">
+                  {customer.citizenId}
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
-                  {customer.lastContact}
+                  <a
+                    className="inline-block max-w-56 truncate font-medium text-[#8f6847] hover:text-[#6f5238]"
+                    href={customer.shopPageUrl}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {customer.shopPageUrl}
+                  </a>
                 </td>
               </tr>
             ))}
