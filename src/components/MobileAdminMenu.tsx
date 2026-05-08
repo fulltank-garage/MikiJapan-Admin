@@ -16,6 +16,7 @@ type MobileAdminMenuProps = {
   onOpenCustomers: () => void
   onOpenDashboard: () => void
   onOpenMessages: () => void
+  pendingApplicationCount?: number
   session: AuthSession
 }
 
@@ -48,6 +49,7 @@ export function MobileAdminMenu({
   onOpenCustomers,
   onOpenDashboard,
   onOpenMessages,
+  pendingApplicationCount = 0,
   session,
 }: MobileAdminMenuProps) {
   if (!isOpen) {
@@ -110,7 +112,12 @@ export function MobileAdminMenu({
                   type="button"
                 >
                   <Icon size={18} />
-                  {item.label}
+                  <span className="min-w-0 flex-1">{item.label}</span>
+                  {item.key === 'messages' && pendingApplicationCount > 0 ? (
+                    <span className="grid min-w-6 place-items-center rounded-full bg-white px-2 py-0.5 text-xs font-bold leading-5 text-[#6f5238]">
+                      {pendingApplicationCount}
+                    </span>
+                  ) : null}
                 </button>
               )
             })}

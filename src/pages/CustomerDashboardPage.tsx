@@ -9,15 +9,18 @@ import {
   UserRound,
   UsersRound,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import { customerSeed } from '../data/customerSeed'
 import {
+  applicationApi,
   customerApi,
   isApiConfigured,
+  subscribeApplicationEvents,
   type AuthSession,
   type Customer,
+  type MemberApplicationEvent,
 } from '../services/api'
 import { moneyFormatter, numberFormatter } from '../utils/formatters'
 
@@ -39,6 +42,18 @@ export function CustomerDashboardPage({
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [pendingApplicationCount, setPendingApplicationCount] = useState(0)
+
+  const loadPendingApplicationCount = useCallback(async () => {
+    try {
+      const data = isApiConfigured ? await applicationApi.list() : []
+      setPendingApplicationCount(
+        data.filter((application) => application.status === 'pending').length,
+      )
+    } catch {
+      setNotice('โหลดจำนวนข้อมูลการสมัครไม่สำเร็จ')
+    }
+  }, [])
 
   useEffect(() => {
     if (!isApiConfigured) {
@@ -70,6 +85,45 @@ export function CustomerDashboardPage({
     return () => {
       isMounted = false
     }
+  }, [])
+
+  useEffect(() => {
+    const initialLoadTimer = window.setTimeout(() => {
+      void loadPendingApplicationCount()
+    }, 0)
+
+    return () => window.clearTimeout(initialLoadTimer)
+  }, [loadPendingApplicationCount])
+
+  useEffect(() => {
+    return subscribeApplicationEvents({
+      onEvent: (event: MemberApplicationEvent) => {
+        try {
+          if (event.type === 'member_application.created') {
+            setPendingApplicationCount((current) => current + 1)
+            return
+          }
+
+          if (
+            event.type === 'member_application.updated' &&
+            event.data.status !== 'pending'
+          ) {
+            setPendingApplicationCount((current) => Math.max(current - 1, 0))
+            return
+          }
+
+          if (event.type === 'member_application.deleted') {
+            setPendingApplicationCount((current) =>
+              event.data.status === 'pending' || event.data.status === 'rejected'
+                ? Math.max(current - 1, 0)
+                : current,
+            )
+          }
+        } catch {
+          setNotice('รับจำนวนข้อมูลการสมัคร realtime ไม่สำเร็จ')
+        }
+      },
+    })
   }, [])
 
   const filteredCustomers = useMemo(() => {
@@ -131,6 +185,7 @@ export function CustomerDashboardPage({
         onOpenCustomers={onOpenCustomers}
         onOpenDashboard={() => setIsMobileMenuOpen(false)}
         onOpenMessages={onOpenMessages}
+        pendingApplicationCount={pendingApplicationCount}
         session={session}
       />
 
@@ -162,7 +217,12 @@ export function CustomerDashboardPage({
             type="button"
           >
             <Mail size={18} />
-            ข้อมูลการสมัคร
+            <span className="min-w-0 flex-1">ข้อมูลการสมัคร</span>
+            {pendingApplicationCount > 0 ? (
+              <span className="grid min-w-6 place-items-center rounded-full bg-white px-2 py-0.5 text-xs font-bold leading-5 text-[#6f5238]">
+                {pendingApplicationCount}
+              </span>
+            ) : null}
           </button>
         </nav>
 

@@ -262,6 +262,7 @@ export function MessagesPage({
         onOpenCustomers={onOpenCustomers}
         onOpenDashboard={onBackToDashboard}
         onOpenMessages={() => setIsMobileMenuOpen(false)}
+        pendingApplicationCount={pendingApplicationCount}
         session={session}
       />
 

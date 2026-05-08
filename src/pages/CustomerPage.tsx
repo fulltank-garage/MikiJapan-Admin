@@ -67,6 +67,7 @@ export function CustomerPage({
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [pendingApplicationCount, setPendingApplicationCount] = useState(0)
   const [realtimeStatus, setRealtimeStatus] =
     useState<RealtimeStatus>('connecting')
 
@@ -77,6 +78,9 @@ export function CustomerPage({
         (application) => application.status === 'approved',
       )
       setCustomers(approvedCustomers)
+      setPendingApplicationCount(
+        data.filter((application) => application.status === 'pending').length,
+      )
     } catch {
       setNotice('โหลดข้อมูลลูกค้าจาก API ไม่สำเร็จ')
     } finally {
@@ -102,6 +106,7 @@ export function CustomerPage({
           event.data.status === 'approved'
         ) {
           setCustomers((current) => upsertCustomer(current, event.data))
+          setPendingApplicationCount((current) => Math.max(current - 1, 0))
           return
         }
 
@@ -112,6 +117,16 @@ export function CustomerPage({
           setCustomers((current) =>
             current.filter((customer) => customer.id !== event.data.id),
           )
+          setPendingApplicationCount((current) =>
+            event.data.status === 'pending' || event.data.status === 'rejected'
+              ? Math.max(current - 1, 0)
+              : current,
+          )
+          return
+        }
+
+        if (event.type === 'member_application.created') {
+          setPendingApplicationCount((current) => current + 1)
         }
       } catch {
         setNotice('รับข้อมูล realtime ไม่สำเร็จ')
@@ -193,6 +208,7 @@ export function CustomerPage({
         onOpenCustomers={() => setIsMobileMenuOpen(false)}
         onOpenDashboard={onOpenDashboard}
         onOpenMessages={onOpenMessages}
+        pendingApplicationCount={pendingApplicationCount}
         session={session}
       />
 
@@ -224,7 +240,12 @@ export function CustomerPage({
             type="button"
           >
             <Mail size={18} />
-            ข้อมูลการสมัคร
+            <span className="min-w-0 flex-1">ข้อมูลการสมัคร</span>
+            {pendingApplicationCount > 0 ? (
+              <span className="grid min-w-6 place-items-center rounded-full bg-white px-2 py-0.5 text-xs font-bold leading-5 text-[#6f5238]">
+                {pendingApplicationCount}
+              </span>
+            ) : null}
           </button>
         </nav>
 
