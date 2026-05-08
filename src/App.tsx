@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { CustomerPage } from './pages/CustomerPage'
-import { CustomerDashboardPage } from './pages/CustomerDashboardPage'
+import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
-import { MessagesPage } from './pages/MessagesPage'
+import { MemberApplicationsPage } from './pages/MemberApplicationsPage'
+import { MemberManagementPage } from './pages/MemberManagementPage'
 import {
   applicationApi,
   isApiConfigured,
@@ -160,7 +160,7 @@ function App() {
 
   if (activePage === 'customers') {
     return (
-      <CustomerPage
+      <MemberManagementPage
         onLogout={handleLogout}
         onOpenDashboard={() => openPage('dashboard')}
         onOpenMessages={() => openPage('messages')}
@@ -172,7 +172,7 @@ function App() {
 
   if (activePage === 'messages') {
     return (
-      <MessagesPage
+      <MemberApplicationsPage
         onBackToDashboard={() => openPage('dashboard')}
         onLogout={handleLogout}
         onOpenCustomers={() => openPage('customers')}
@@ -183,7 +183,7 @@ function App() {
   }
 
   return (
-    <CustomerDashboardPage
+    <DashboardPage
       onLogout={handleLogout}
       onOpenMessages={() => openPage('messages')}
       onOpenCustomers={() => openPage('customers')}

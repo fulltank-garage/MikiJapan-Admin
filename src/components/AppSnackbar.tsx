@@ -1,12 +1,12 @@
 import { X } from 'lucide-react'
 import { useEffect } from 'react'
 
-type SnackbarProps = {
+type AppSnackbarProps = {
   message: string
   onClose: () => void
 }
 
-export function Snackbar({ message, onClose }: SnackbarProps) {
+export function AppSnackbar({ message, onClose }: AppSnackbarProps) {
   useEffect(() => {
     if (!message) {
       return

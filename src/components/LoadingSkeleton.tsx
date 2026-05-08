@@ -1,8 +1,10 @@
-type SkeletonBlockProps = {
+type LoadingSkeletonBlockProps = {
   className?: string
 }
 
-export function SkeletonBlock({ className = '' }: SkeletonBlockProps) {
+export function LoadingSkeletonBlock({
+  className = '',
+}: LoadingSkeletonBlockProps) {
   return (
     <span
       aria-hidden="true"

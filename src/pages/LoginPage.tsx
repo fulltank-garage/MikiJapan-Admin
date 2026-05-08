@@ -1,7 +1,7 @@
 import { ShieldCheck } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
-import { BrandLogo } from '../components/BrandLogo'
-import { Snackbar } from '../components/Snackbar'
+import { AppSnackbar } from '../components/AppSnackbar'
+import { MikiJapanLogo } from '../components/MikiJapanLogo'
 import { authApi, type AuthSession, type LoginPayload } from '../services/api'
 
 type LoginPageProps = {
@@ -42,7 +42,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[#fbf6f0] px-4 py-8 text-slate-900 sm:px-8 sm:py-10">
-      <Snackbar message={error} onClose={() => setError('')} />
+      <AppSnackbar message={error} onClose={() => setError('')} />
 
       <section className="w-full max-w-md">
         <form
@@ -50,7 +50,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           onSubmit={handleSubmit}
         >
           <div className="mb-8 flex flex-col items-center text-center">
-            <BrandLogo className="size-16 shrink-0 sm:size-20" />
+            <MikiJapanLogo className="size-16 shrink-0 sm:size-20" />
             <h1 className="mt-4 text-2xl font-semibold text-slate-950">
               Miki Japan
             </h1>

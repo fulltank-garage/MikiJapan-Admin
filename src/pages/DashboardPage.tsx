@@ -6,10 +6,10 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { BrandLogo } from '../components/BrandLogo'
-import { MobileAdminMenu } from '../components/MobileAdminMenu'
-import { SkeletonBlock } from '../components/Skeleton'
-import { Snackbar } from '../components/Snackbar'
+import { AdminMobileMenu } from '../components/AdminMobileMenu'
+import { AppSnackbar } from '../components/AppSnackbar'
+import { LoadingSkeletonBlock } from '../components/LoadingSkeleton'
+import { MikiJapanLogo } from '../components/MikiJapanLogo'
 import {
   isApiConfigured,
   memberApi,
@@ -20,7 +20,7 @@ import {
 } from '../services/api'
 import { numberFormatter } from '../utils/formatters'
 
-type CustomerDashboardPageProps = {
+type DashboardPageProps = {
   onLogout: () => void
   onOpenCustomers: () => void
   onOpenMessages: () => void
@@ -45,13 +45,13 @@ const upsertCustomer = (
   )
 }
 
-export function CustomerDashboardPage({
+export function DashboardPage({
   onLogout,
   onOpenCustomers,
   onOpenMessages,
   pendingApplicationCount,
   session,
-}: CustomerDashboardPageProps) {
+}: DashboardPageProps) {
   const [customers, setCustomers] = useState<MemberApplication[]>([])
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -136,9 +136,9 @@ export function CustomerDashboardPage({
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
-      <Snackbar message={notice} onClose={() => setNotice('')} />
+      <AppSnackbar message={notice} onClose={() => setNotice('')} />
 
-      <MobileAdminMenu
+      <AdminMobileMenu
         activePage="dashboard"
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
@@ -151,7 +151,7 @@ export function CustomerDashboardPage({
 
       <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white xl:flex">
         <div className="mb-9 flex items-center gap-3">
-          <BrandLogo className="size-11 shrink-0" />
+          <MikiJapanLogo className="size-11 shrink-0" />
           <div>
             <p className="text-lg font-semibold">Miki Japan</p>
           </div>
@@ -244,7 +244,7 @@ export function CustomerDashboardPage({
                         {item.label}
                       </p>
                       {item.isLoading ? (
-                        <SkeletonBlock className="mt-2 h-7 w-16 rounded-xl" />
+                        <LoadingSkeletonBlock className="mt-2 h-7 w-16 rounded-xl" />
                       ) : (
                         <p className="mt-1 text-xl font-semibold leading-7 text-slate-950 sm:mt-2 sm:text-2xl">
                           {item.value}
@@ -273,7 +273,7 @@ export function CustomerDashboardPage({
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {isLoadingCustomers ? (
-                    <SkeletonBlock className="h-5 w-full max-w-[22rem] rounded-xl" />
+                    <LoadingSkeletonBlock className="h-5 w-full max-w-[22rem] rounded-xl" />
                   ) : (
                     `มีสมาชิก ${numberFormatter.format(customers.length)} คน และใบสมัครรอตรวจสอบ ${numberFormatter.format(pendingApplicationCount)} รายการ`
                   )}

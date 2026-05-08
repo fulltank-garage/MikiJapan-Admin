@@ -15,10 +15,11 @@ import {
   XCircle,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { BrandLogo } from '../components/BrandLogo'
-import { MobileAdminMenu } from '../components/MobileAdminMenu'
-import { SkeletonBlock } from '../components/Skeleton'
-import { Snackbar } from '../components/Snackbar'
+import { AdminMobileMenu } from '../components/AdminMobileMenu'
+import { AppSnackbar } from '../components/AppSnackbar'
+import { ConfirmationDialog } from '../components/ConfirmationDialog'
+import { LoadingSkeletonBlock } from '../components/LoadingSkeleton'
+import { MikiJapanLogo } from '../components/MikiJapanLogo'
 import {
   applicationApi,
   isApiConfigured,
@@ -30,12 +31,17 @@ import {
   type RealtimeStatus,
 } from '../services/api'
 
-type MessagesPageProps = {
+type MemberApplicationsPageProps = {
   onBackToDashboard: () => void
   onLogout: () => void
   onOpenCustomers: () => void
   pendingApplicationCount: number
   session: AuthSession
+}
+
+type PendingStatusChange = {
+  application: MemberApplication
+  status: ApplicationStatus
 }
 
 const statusMeta: Record<
@@ -92,13 +98,13 @@ const upsertApplication = (
   )
 }
 
-export function MessagesPage({
+export function MemberApplicationsPage({
   onBackToDashboard,
   onLogout,
   onOpenCustomers,
   pendingApplicationCount,
   session,
-}: MessagesPageProps) {
+}: MemberApplicationsPageProps) {
   const [customerApplications, setCustomerApplications] =
     useState<MemberApplication[]>([])
   const [query, setQuery] = useState('')
@@ -106,6 +112,8 @@ export function MessagesPage({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
   const [notice, setNotice] = useState('')
+  const [pendingStatusChange, setPendingStatusChange] =
+    useState<PendingStatusChange | null>(null)
   const [realtimeStatus, setRealtimeStatus] =
     useState<RealtimeStatus>('connecting')
 
@@ -220,32 +228,32 @@ export function MessagesPage({
     filteredApplications[0] ||
     null
 
-  const updateApplicationStatus = async (status: ApplicationStatus) => {
-    if (!selectedApplication) {
-      return
-    }
-
+  const updateApplicationStatus = async (
+    application: MemberApplication,
+    status: ApplicationStatus,
+  ) => {
     setNotice('')
+    setPendingStatusChange(null)
 
     try {
       const updatedApplication = isApiConfigured
-        ? await applicationApi.updateStatus(selectedApplication.id, status)
-        : { ...selectedApplication, status }
+        ? await applicationApi.updateStatus(application.id, status)
+        : { ...application, status }
 
       const remainingPendingApplications = customerApplications.filter(
         (application) =>
-          application.id !== selectedApplication.id &&
+          application.id !== updatedApplication.id &&
           application.status === 'pending',
       )
       setCustomerApplications((current) =>
         status === 'approved'
           ? current.map((application) =>
-              application.id === selectedApplication.id
+              application.id === updatedApplication.id
                 ? updatedApplication
                 : application,
             )
           : current.filter(
-              (application) => application.id !== selectedApplication.id,
+              (application) => application.id !== updatedApplication.id,
             ),
       )
       setSelectedApplicationId(remainingPendingApplications[0]?.id || '')
@@ -259,11 +267,45 @@ export function MessagesPage({
     }
   }
 
+  const pendingStatusCustomerName = pendingStatusChange
+    ? getApplicationFullName(pendingStatusChange.application)
+    : ''
+  const isApprovingApplication = pendingStatusChange?.status === 'approved'
+
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
-      <Snackbar message={notice} onClose={() => setNotice('')} />
+      <AppSnackbar message={notice} onClose={() => setNotice('')} />
 
-      <MobileAdminMenu
+      <ConfirmationDialog
+        confirmLabel={
+          isApprovingApplication ? 'ยืนยันการสมัคร' : 'ปฏิเสธการสมัคร'
+        }
+        description={
+          isApprovingApplication
+            ? `ระบบจะย้ายข้อมูลของ ${pendingStatusCustomerName} ไปหน้า จัดการข้อมูลลูกค้า เปลี่ยน Rich Menu เป็น Member และส่งข้อความแจ้งลูกค้า`
+            : `ระบบจะลบข้อมูลการสมัครของ ${pendingStatusCustomerName} ออกจาก database เปลี่ยน Rich Menu กลับไปสมัครใหม่ และส่งข้อความแจ้งลูกค้าว่าไม่ผ่านเกณฑ์`
+        }
+        isOpen={Boolean(pendingStatusChange)}
+        onCancel={() => setPendingStatusChange(null)}
+        onConfirm={() => {
+          if (!pendingStatusChange) {
+            return
+          }
+
+          void updateApplicationStatus(
+            pendingStatusChange.application,
+            pendingStatusChange.status,
+          )
+        }}
+        title={
+          isApprovingApplication
+            ? 'ยืนยันการสมัครนี้หรือไม่?'
+            : 'ปฏิเสธการสมัครนี้หรือไม่?'
+        }
+        variant={isApprovingApplication ? 'primary' : 'danger'}
+      />
+
+      <AdminMobileMenu
         activePage="messages"
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
@@ -276,7 +318,7 @@ export function MessagesPage({
 
       <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white xl:flex">
         <div className="mb-9 flex items-center gap-3">
-          <BrandLogo className="size-11 shrink-0" />
+          <MikiJapanLogo className="size-11 shrink-0" />
           <div>
             <p className="text-lg font-semibold">Miki Japan</p>
           </div>
@@ -365,7 +407,7 @@ export function MessagesPage({
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {isLoadingApplications ? (
-                    <SkeletonBlock className="h-5 w-32 rounded-xl" />
+                    <LoadingSkeletonBlock className="h-5 w-32 rounded-xl" />
                   ) : (
                     `${filteredApplications.length} รายการที่ต้องจัดการ`
                   )}
@@ -454,7 +496,12 @@ export function MessagesPage({
                         <button
                           className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
                           disabled={selectedApplication.status === 'approved'}
-                          onClick={() => updateApplicationStatus('approved')}
+                          onClick={() =>
+                            setPendingStatusChange({
+                              application: selectedApplication,
+                              status: 'approved',
+                            })
+                          }
                           type="button"
                         >
                           <CheckCircle2 size={17} />
@@ -466,7 +513,12 @@ export function MessagesPage({
                         <button
                           className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
                           disabled={selectedApplication.status === 'rejected'}
-                          onClick={() => updateApplicationStatus('rejected')}
+                          onClick={() =>
+                            setPendingStatusChange({
+                              application: selectedApplication,
+                              status: 'rejected',
+                            })
+                          }
                           type="button"
                         >
                           <XCircle size={17} />
@@ -541,12 +593,12 @@ function ApplicationListSkeleton() {
       {applicationSkeletonRows.map((row) => (
         <div className="px-4 py-3 sm:px-5" key={row}>
           <div className="flex min-w-0 items-center gap-3">
-            <SkeletonBlock className="size-12 shrink-0 rounded-2xl" />
+            <LoadingSkeletonBlock className="size-12 shrink-0 rounded-2xl" />
             <div className="min-w-0 flex-1">
-              <SkeletonBlock className="h-4 w-40 max-w-full rounded-xl" />
-              <SkeletonBlock className="mt-2 h-4 w-32 max-w-[80%] rounded-xl" />
+              <LoadingSkeletonBlock className="h-4 w-40 max-w-full rounded-xl" />
+              <LoadingSkeletonBlock className="mt-2 h-4 w-32 max-w-[80%] rounded-xl" />
             </div>
-            <SkeletonBlock className="h-7 w-24 shrink-0 rounded-full" />
+            <LoadingSkeletonBlock className="h-7 w-24 shrink-0 rounded-full" />
           </div>
         </div>
       ))}
@@ -559,26 +611,26 @@ function ApplicationDetailSkeleton() {
     <>
       <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 items-center gap-3">
-          <SkeletonBlock className="size-14 shrink-0 rounded-2xl" />
+          <LoadingSkeletonBlock className="size-14 shrink-0 rounded-2xl" />
           <div className="min-w-0 flex-1">
-            <SkeletonBlock className="h-5 w-48 max-w-full rounded-xl" />
-            <SkeletonBlock className="mt-2 h-4 w-36 max-w-[80%] rounded-xl" />
+            <LoadingSkeletonBlock className="h-5 w-48 max-w-full rounded-xl" />
+            <LoadingSkeletonBlock className="mt-2 h-4 w-36 max-w-[80%] rounded-xl" />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
-          <SkeletonBlock className="h-11 rounded-2xl sm:w-36" />
-          <SkeletonBlock className="h-11 rounded-2xl sm:w-36" />
+          <LoadingSkeletonBlock className="h-11 rounded-2xl sm:w-36" />
+          <LoadingSkeletonBlock className="h-11 rounded-2xl sm:w-36" />
         </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <div className="min-w-0 overflow-hidden rounded-2xl border border-[#ead8c7] bg-[#fff8f1]">
           <div className="flex items-center justify-between gap-3 px-3 py-2.5">
-            <SkeletonBlock className="h-5 w-24 rounded-xl" />
-            <SkeletonBlock className="h-4 w-14 rounded-xl" />
+            <LoadingSkeletonBlock className="h-5 w-24 rounded-xl" />
+            <LoadingSkeletonBlock className="h-4 w-14 rounded-xl" />
           </div>
-          <SkeletonBlock className="h-40 w-full rounded-none sm:h-52 lg:h-56 xl:h-80" />
+          <LoadingSkeletonBlock className="h-40 w-full rounded-none sm:h-52 lg:h-56 xl:h-80" />
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
@@ -588,10 +640,10 @@ function ApplicationDetailSkeleton() {
               key={row}
             >
               <div className="flex items-start gap-2">
-                <SkeletonBlock className="mt-0.5 size-4 shrink-0 rounded-md" />
+                <LoadingSkeletonBlock className="mt-0.5 size-4 shrink-0 rounded-md" />
                 <div className="min-w-0 flex-1">
-                  <SkeletonBlock className="h-3 w-20 rounded-xl" />
-                  <SkeletonBlock className="mt-2 h-5 w-36 max-w-full rounded-xl" />
+                  <LoadingSkeletonBlock className="h-3 w-20 rounded-xl" />
+                  <LoadingSkeletonBlock className="mt-2 h-5 w-36 max-w-full rounded-xl" />
                 </div>
               </div>
             </div>

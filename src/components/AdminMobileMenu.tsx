@@ -5,12 +5,12 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect } from 'react'
-import { BrandLogo } from './BrandLogo'
+import { MikiJapanLogo } from './MikiJapanLogo'
 import type { AuthSession } from '../services/api'
 
 type AdminPageKey = 'dashboard' | 'customers' | 'messages'
 
-type MobileAdminMenuProps = {
+type AdminMobileMenuProps = {
   activePage: AdminPageKey
   isOpen: boolean
   onClose: () => void
@@ -45,7 +45,7 @@ const navItems = [
 
 const menuTransitionMs = 260
 
-export function MobileAdminMenu({
+export function AdminMobileMenu({
   activePage,
   isOpen,
   onClose,
@@ -54,7 +54,7 @@ export function MobileAdminMenu({
   onOpenMessages,
   pendingApplicationCount = 0,
   session,
-}: MobileAdminMenuProps) {
+}: AdminMobileMenuProps) {
   useEffect(() => {
     if (!isOpen) {
       return
@@ -118,7 +118,7 @@ export function MobileAdminMenu({
         >
           <div className="mb-8 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <BrandLogo className="size-11 shrink-0" />
+              <MikiJapanLogo className="size-11 shrink-0" />
               <div>
                 <p className="text-lg font-semibold text-white">Miki Japan</p>
               </div>

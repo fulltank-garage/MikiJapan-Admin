@@ -1,14 +1,14 @@
 import mikiJapanLogo from '../assets/miki-japan-logo.jpg'
 
-type BrandLogoProps = {
+type MikiJapanLogoProps = {
   className?: string
   title?: string
 }
 
-export function BrandLogo({
+export function MikiJapanLogo({
   className = 'size-10',
   title = 'Miki Japan logo',
-}: BrandLogoProps) {
+}: MikiJapanLogoProps) {
   return (
     <img
       alt={title}

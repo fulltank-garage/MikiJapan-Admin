@@ -10,10 +10,11 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { BrandLogo } from '../components/BrandLogo'
-import { MobileAdminMenu } from '../components/MobileAdminMenu'
-import { SkeletonBlock } from '../components/Skeleton'
-import { Snackbar } from '../components/Snackbar'
+import { AdminMobileMenu } from '../components/AdminMobileMenu'
+import { AppSnackbar } from '../components/AppSnackbar'
+import { ConfirmationDialog } from '../components/ConfirmationDialog'
+import { LoadingSkeletonBlock } from '../components/LoadingSkeleton'
+import { MikiJapanLogo } from '../components/MikiJapanLogo'
 import {
   isApiConfigured,
   memberApi,
@@ -24,7 +25,7 @@ import {
   type RealtimeStatus,
 } from '../services/api'
 
-type CustomerPageProps = {
+type MemberManagementPageProps = {
   onLogout: () => void
   onOpenDashboard: () => void
   onOpenMessages: () => void
@@ -57,18 +58,20 @@ const upsertCustomer = (
   )
 }
 
-export function CustomerPage({
+export function MemberManagementPage({
   onLogout,
   onOpenDashboard,
   onOpenMessages,
   pendingApplicationCount,
   session,
-}: CustomerPageProps) {
+}: MemberManagementPageProps) {
   const [customers, setCustomers] = useState<MemberApplication[]>([])
   const [query, setQuery] = useState('')
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [pendingDeleteCustomer, setPendingDeleteCustomer] =
+    useState<MemberApplication | null>(null)
   const [realtimeStatus, setRealtimeStatus] =
     useState<RealtimeStatus>('connecting')
 
@@ -157,16 +160,9 @@ export function CustomerPage({
     )
   }, [customers, query])
 
-  const handleDeleteCustomer = async (customer: MemberApplication) => {
-    const confirmed = window.confirm(
-      `ลบข้อมูลของ ${getApplicationFullName(customer)} หรือไม่? Rich Menu ของลูกค้าจะเปลี่ยนกลับเป็น Register`,
-    )
-
-    if (!confirmed) {
-      return
-    }
-
+  const deleteCustomer = async (customer: MemberApplication) => {
     setNotice('')
+    setPendingDeleteCustomer(null)
 
     try {
       if (isApiConfigured) {
@@ -182,11 +178,31 @@ export function CustomerPage({
     }
   }
 
+  const pendingDeleteCustomerName = pendingDeleteCustomer
+    ? getApplicationFullName(pendingDeleteCustomer)
+    : ''
+
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
-      <Snackbar message={notice} onClose={() => setNotice('')} />
+      <AppSnackbar message={notice} onClose={() => setNotice('')} />
 
-      <MobileAdminMenu
+      <ConfirmationDialog
+        confirmLabel="ลบข้อมูลลูกค้า"
+        description={`ระบบจะลบข้อมูลของ ${pendingDeleteCustomerName} ออกจาก database และเปลี่ยน Rich Menu ของลูกค้ากลับเป็น Register`}
+        isOpen={Boolean(pendingDeleteCustomer)}
+        onCancel={() => setPendingDeleteCustomer(null)}
+        onConfirm={() => {
+          if (!pendingDeleteCustomer) {
+            return
+          }
+
+          void deleteCustomer(pendingDeleteCustomer)
+        }}
+        title="ลบข้อมูลลูกค้านี้หรือไม่?"
+        variant="danger"
+      />
+
+      <AdminMobileMenu
         activePage="customers"
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
@@ -199,7 +215,7 @@ export function CustomerPage({
 
       <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white xl:flex">
         <div className="mb-9 flex items-center gap-3">
-          <BrandLogo className="size-11 shrink-0" />
+          <MikiJapanLogo className="size-11 shrink-0" />
           <div>
             <p className="text-lg font-semibold">Miki Japan</p>
           </div>
@@ -302,7 +318,7 @@ export function CustomerPage({
             <CustomerTable
               customers={filteredCustomers}
               isLoading={isLoadingCustomers}
-              onDeleteCustomer={handleDeleteCustomer}
+              onDeleteCustomer={setPendingDeleteCustomer}
             />
           </section>
         </main>
@@ -443,27 +459,27 @@ function CustomerTableSkeletonRows() {
         <tr className="align-middle" key={row}>
           <td className="px-5 py-4">
             <div className="flex min-w-0 items-center gap-3">
-              <SkeletonBlock className="size-12 shrink-0 rounded-2xl" />
+              <LoadingSkeletonBlock className="size-12 shrink-0 rounded-2xl" />
               <div className="min-w-0">
-                <SkeletonBlock className="h-4 w-36 rounded-xl" />
-                <SkeletonBlock className="mt-2 h-3 w-16 rounded-xl" />
+                <LoadingSkeletonBlock className="h-4 w-36 rounded-xl" />
+                <LoadingSkeletonBlock className="mt-2 h-3 w-16 rounded-xl" />
               </div>
             </div>
           </td>
           <td className="px-5 py-4">
-            <SkeletonBlock className="h-4 w-20 rounded-xl" />
+            <LoadingSkeletonBlock className="h-4 w-20 rounded-xl" />
           </td>
           <td className="px-5 py-4">
-            <SkeletonBlock className="h-4 w-28 rounded-xl" />
+            <LoadingSkeletonBlock className="h-4 w-28 rounded-xl" />
           </td>
           <td className="px-5 py-4">
-            <SkeletonBlock className="h-4 w-36 rounded-xl" />
+            <LoadingSkeletonBlock className="h-4 w-36 rounded-xl" />
           </td>
           <td className="px-5 py-4">
-            <SkeletonBlock className="h-4 w-52 rounded-xl" />
+            <LoadingSkeletonBlock className="h-4 w-52 rounded-xl" />
           </td>
           <td className="px-5 py-4">
-            <SkeletonBlock className="ml-auto h-10 w-24 rounded-2xl" />
+            <LoadingSkeletonBlock className="ml-auto h-10 w-24 rounded-2xl" />
           </td>
         </tr>
       ))}
@@ -475,17 +491,17 @@ function CustomerCardSkeleton() {
   return (
     <article className="min-w-0 overflow-hidden rounded-2xl border border-[#ead8c7] bg-white p-4 shadow-sm">
       <div className="flex min-w-0 items-start gap-3">
-        <SkeletonBlock className="size-12 shrink-0 rounded-2xl" />
+        <LoadingSkeletonBlock className="size-12 shrink-0 rounded-2xl" />
         <div className="min-w-0 flex-1">
-          <SkeletonBlock className="h-5 w-40 max-w-full rounded-xl" />
-          <SkeletonBlock className="mt-2 h-4 w-44 max-w-full rounded-xl" />
+          <LoadingSkeletonBlock className="h-5 w-40 max-w-full rounded-xl" />
+          <LoadingSkeletonBlock className="mt-2 h-4 w-44 max-w-full rounded-xl" />
         </div>
-        <SkeletonBlock className="size-10 shrink-0 rounded-2xl" />
+        <LoadingSkeletonBlock className="size-10 shrink-0 rounded-2xl" />
       </div>
 
       <div className="mt-4 grid min-w-0 gap-2">
-        <SkeletonBlock className="h-4 w-full rounded-xl" />
-        <SkeletonBlock className="h-4 w-4/5 rounded-xl" />
+        <LoadingSkeletonBlock className="h-4 w-full rounded-xl" />
+        <LoadingSkeletonBlock className="h-4 w-4/5 rounded-xl" />
       </div>
     </article>
   )
