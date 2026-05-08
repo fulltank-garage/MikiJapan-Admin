@@ -297,6 +297,14 @@ export function MessagesPage({
           <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
+          <button
+            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
+            onClick={onLogout}
+            type="button"
+          >
+            <LogOut size={17} />
+            ออกจากระบบ
+          </button>
         </div>
       </aside>
 
@@ -324,25 +332,6 @@ export function MessagesPage({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <RealtimeStatusBadge status={realtimeStatus} />
-              <button
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#ead8c7] bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-[#fff8f1]"
-                onClick={onBackToDashboard}
-                type="button"
-              >
-                <LayoutDashboard size={17} />
-                Dashboard
-              </button>
-              <button
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
-                onClick={onLogout}
-                title="Logout"
-                type="button"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
           </div>
         </header>
 
@@ -420,19 +409,7 @@ export function MessagesPage({
               <article className="p-5">
                 {selectedApplication ? (
                   <>
-                    <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-[#8f6847]">
-                          Application Detail
-                        </p>
-                        <h2 className="mt-1 text-xl font-semibold text-slate-950">
-                          {getApplicationFullName(selectedApplication)}
-                        </h2>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <ApplicationStatusBadge
-                          status={selectedApplication.status}
-                        />
+                    <div className="mb-5 flex flex-wrap items-center justify-end gap-2">
                         <button
                           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
                           disabled={selectedApplication.status === 'approved'}
@@ -451,7 +428,6 @@ export function MessagesPage({
                           <XCircle size={17} />
                           ปฏิเสธการสมัคร
                         </button>
-                      </div>
                     </div>
 
                     {notice ? (
@@ -571,27 +547,6 @@ function ApplicationStatusBadge({ status }: { status: ApplicationStatus }) {
     >
       <Icon size={13} />
       {meta.label}
-    </span>
-  )
-}
-
-function RealtimeStatusBadge({ status }: { status: RealtimeStatus }) {
-  const isConnected = status === 'connected'
-
-  return (
-    <span
-      className={`hidden h-10 items-center gap-2 rounded-lg border px-3 text-xs font-semibold sm:inline-flex ${
-        isConnected
-          ? 'border-[#d8c1a8] bg-[#fbf1e7] text-[#8f6847]'
-          : 'border-[#d8b8a7] bg-[#f8eee8] text-[#9a5f45]'
-      }`}
-    >
-      <span
-        className={`size-2 rounded-full ${
-          isConnected ? 'bg-[#8f6847]' : 'bg-[#9a5f45]'
-        }`}
-      />
-      {isConnected ? 'Realtime' : 'Syncing'}
     </span>
   )
 }

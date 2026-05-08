@@ -1,5 +1,4 @@
 import {
-  CheckCircle2,
   CircleDollarSign,
   ClipboardList,
   LayoutDashboard,
@@ -172,6 +171,14 @@ export function CustomerDashboardPage({
           <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
+          <button
+            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
+            onClick={onLogout}
+            type="button"
+          >
+            <LogOut size={17} />
+            ออกจากระบบ
+          </button>
         </div>
       </aside>
 
@@ -199,25 +206,6 @@ export function CustomerDashboardPage({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="hidden h-10 items-center gap-2 rounded-lg border border-[#ead8c7] bg-white px-3 text-sm font-medium text-slate-700 sm:inline-flex">
-                <CheckCircle2
-                  className={
-                    isApiConfigured ? 'text-[#8f6847]' : 'text-[#c49a6c]'
-                  }
-                  size={17}
-                />
-                {isApiConfigured ? 'API พร้อมใช้งาน' : 'ข้อมูลตัวอย่าง'}
-              </span>
-              <button
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
-                onClick={onLogout}
-                title="ออกจากระบบ"
-                type="button"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
           </div>
         </header>
 

@@ -233,6 +233,14 @@ export function CustomerPage({
           <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
+          <button
+            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
+            onClick={onLogout}
+            type="button"
+          >
+            <LogOut size={17} />
+            ออกจากระบบ
+          </button>
         </div>
       </aside>
 
@@ -260,17 +268,6 @@ export function CustomerPage({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <RealtimeStatusBadge status={realtimeStatus} />
-              <button
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
-                onClick={onLogout}
-                title="ออกจากระบบ"
-                type="button"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
           </div>
         </header>
 
@@ -470,26 +467,5 @@ function CustomerLinkDetail({
         <ExternalLink className="shrink-0" size={14} />
       </a>
     </div>
-  )
-}
-
-function RealtimeStatusBadge({ status }: { status: RealtimeStatus }) {
-  const isConnected = status === 'connected'
-
-  return (
-    <span
-      className={`hidden h-10 items-center gap-2 rounded-lg border px-3 text-xs font-semibold sm:inline-flex ${
-        isConnected
-          ? 'border-[#d8c1a8] bg-[#fbf1e7] text-[#8f6847]'
-          : 'border-[#d8b8a7] bg-[#f8eee8] text-[#9a5f45]'
-      }`}
-    >
-      <span
-        className={`size-2 rounded-full ${
-          isConnected ? 'bg-[#8f6847]' : 'bg-[#9a5f45]'
-        }`}
-      />
-      {isConnected ? 'Realtime' : 'Syncing'}
-    </span>
   )
 }
