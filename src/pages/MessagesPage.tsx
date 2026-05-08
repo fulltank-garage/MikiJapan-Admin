@@ -17,6 +17,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
+import { SkeletonBlock } from '../components/Skeleton'
 import { Snackbar } from '../components/Snackbar'
 import {
   applicationApi,
@@ -63,6 +64,16 @@ const getApplicationFullName = (application: MemberApplication) =>
 
 const getStorefrontImageUrl = (application: MemberApplication) =>
   application.storefrontImageUrl || application.storefrontImage || ''
+
+const applicationSkeletonRows = ['application-1', 'application-2', 'application-3']
+const applicationDetailSkeletonFields = [
+  'field-1',
+  'field-2',
+  'field-3',
+  'field-4',
+  'field-5',
+  'field-6',
+]
 
 const upsertApplication = (
   applications: MemberApplication[],
@@ -353,9 +364,11 @@ export function MessagesPage({
                   รายการรอตรวจสอบ
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {isLoadingApplications
-                    ? 'กำลังโหลดข้อมูล'
-                    : `${filteredApplications.length} รายการที่ต้องจัดการ`}
+                  {isLoadingApplications ? (
+                    <SkeletonBlock className="h-5 w-32 rounded-xl" />
+                  ) : (
+                    `${filteredApplications.length} รายการที่ต้องจัดการ`
+                  )}
                 </p>
               </div>
 
@@ -376,44 +389,48 @@ export function MessagesPage({
             <div className="grid lg:min-h-[34rem] lg:grid-cols-[minmax(320px,0.75fr)_minmax(0,1.25fr)]">
               <div className="border-b border-[#ead8c7] lg:border-b-0 lg:border-r">
                 <div className="max-h-[18rem] divide-y divide-[#ead8c7] overflow-y-auto sm:max-h-[24rem] lg:max-h-[calc(100dvh-14rem)]">
-                  {filteredApplications.map((application) => (
-                    <button
-                      className={`block w-full min-w-0 px-4 py-3 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
-                        selectedApplication?.id === application.id
-                          ? 'bg-[#fbf1e7]/80 shadow-[inset_4px_0_0_#9a7655]'
-                          : ''
-                      }`}
-                      key={application.id}
-                      onClick={() => setSelectedApplicationId(application.id)}
-                      type="button"
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <ApplicationThumb application={application} />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-semibold text-slate-950">
-                            {getApplicationFullName(application)}
-                          </p>
-                          <p className="mt-1 truncate text-sm text-slate-500">
-                            {application.nickname} · {application.phone}
-                          </p>
+                  {isLoadingApplications ? (
+                    <ApplicationListSkeleton />
+                  ) : (
+                    filteredApplications.map((application) => (
+                      <button
+                        className={`block w-full min-w-0 px-4 py-3 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
+                          selectedApplication?.id === application.id
+                            ? 'bg-[#fbf1e7]/80 shadow-[inset_4px_0_0_#9a7655]'
+                            : ''
+                        }`}
+                        key={application.id}
+                        onClick={() => setSelectedApplicationId(application.id)}
+                        type="button"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <ApplicationThumb application={application} />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-semibold text-slate-950">
+                              {getApplicationFullName(application)}
+                            </p>
+                            <p className="mt-1 truncate text-sm text-slate-500">
+                              {application.nickname} · {application.phone}
+                            </p>
+                          </div>
+                          <ApplicationStatusBadge status={application.status} />
                         </div>
-                        <ApplicationStatusBadge status={application.status} />
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))
+                  )}
 
-                  {filteredApplications.length === 0 ? (
+                  {!isLoadingApplications && filteredApplications.length === 0 ? (
                     <div className="px-5 py-8 text-center text-sm text-slate-500">
-                      {isLoadingApplications
-                        ? 'กำลังโหลดข้อมูลการสมัคร'
-                        : 'ไม่พบข้อมูลการสมัคร'}
+                      ไม่พบข้อมูลการสมัคร
                     </div>
                   ) : null}
                 </div>
               </div>
 
               <article className="min-w-0 p-4 sm:p-5">
-                {selectedApplication ? (
+                {isLoadingApplications ? (
+                  <ApplicationDetailSkeleton />
+                ) : selectedApplication ? (
                   <>
                     <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
@@ -516,6 +533,73 @@ type InfoItemProps = {
   icon: typeof UserRound
   label: string
   value: string
+}
+
+function ApplicationListSkeleton() {
+  return (
+    <>
+      {applicationSkeletonRows.map((row) => (
+        <div className="px-4 py-3 sm:px-5" key={row}>
+          <div className="flex min-w-0 items-center gap-3">
+            <SkeletonBlock className="size-12 shrink-0 rounded-2xl" />
+            <div className="min-w-0 flex-1">
+              <SkeletonBlock className="h-4 w-40 max-w-full rounded-xl" />
+              <SkeletonBlock className="mt-2 h-4 w-32 max-w-[80%] rounded-xl" />
+            </div>
+            <SkeletonBlock className="h-7 w-24 shrink-0 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </>
+  )
+}
+
+function ApplicationDetailSkeleton() {
+  return (
+    <>
+      <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <SkeletonBlock className="size-14 shrink-0 rounded-2xl" />
+          <div className="min-w-0 flex-1">
+            <SkeletonBlock className="h-5 w-48 max-w-full rounded-xl" />
+            <SkeletonBlock className="mt-2 h-4 w-36 max-w-[80%] rounded-xl" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <SkeletonBlock className="h-11 rounded-2xl sm:w-36" />
+          <SkeletonBlock className="h-11 rounded-2xl sm:w-36" />
+        </div>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <div className="min-w-0 overflow-hidden rounded-2xl border border-[#ead8c7] bg-[#fff8f1]">
+          <div className="flex items-center justify-between gap-3 px-3 py-2.5">
+            <SkeletonBlock className="h-5 w-24 rounded-xl" />
+            <SkeletonBlock className="h-4 w-14 rounded-xl" />
+          </div>
+          <SkeletonBlock className="h-40 w-full rounded-none sm:h-52 lg:h-56 xl:h-80" />
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+          {applicationDetailSkeletonFields.map((row) => (
+            <div
+              className="min-w-0 rounded-2xl border border-[#ead8c7] bg-[#fff8f1] px-3 py-2.5"
+              key={row}
+            >
+              <div className="flex items-start gap-2">
+                <SkeletonBlock className="mt-0.5 size-4 shrink-0 rounded-md" />
+                <div className="min-w-0 flex-1">
+                  <SkeletonBlock className="h-3 w-20 rounded-xl" />
+                  <SkeletonBlock className="mt-2 h-5 w-36 max-w-full rounded-xl" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  )
 }
 
 function InfoItem({ icon: Icon, label, value }: InfoItemProps) {

@@ -48,6 +48,34 @@ button {
   cursor: pointer;
 }
 
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f1dfcd 0%,
+    #fff8f1 45%,
+    #f1dfcd 100%
+  );
+  background-size: 220% 100%;
+  border-radius: 1rem;
+  animation: miki-admin-skeleton 1.35s ease-in-out infinite;
+}
+
+@keyframes miki-admin-skeleton {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+  }
+}
+
 #root {
   width: 100%;
   max-width: 100vw;

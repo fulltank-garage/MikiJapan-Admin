@@ -12,6 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
+import { SkeletonBlock } from '../components/Skeleton'
 import { Snackbar } from '../components/Snackbar'
 import {
   isApiConfigured,
@@ -36,6 +37,8 @@ const getApplicationFullName = (application: MemberApplication) =>
 
 const getStorefrontImageUrl = (application: MemberApplication) =>
   application.storefrontImageUrl || application.storefrontImage || ''
+
+const customerSkeletonRows = ['row-1', 'row-2', 'row-3']
 
 const upsertCustomer = (
   customers: MemberApplication[],
@@ -335,7 +338,7 @@ function CustomerTable({
           </thead>
           <tbody className="divide-y divide-[#ead8c7]">
             {isLoading ? (
-              <CustomerTableMessage colSpan={6} message="กำลังโหลดข้อมูลลูกค้า" />
+              <CustomerTableSkeletonRows />
             ) : null}
 
             {!isLoading && customers.length === 0 ? (
@@ -388,9 +391,7 @@ function CustomerTable({
 
       <div className="grid gap-3 p-4 lg:hidden">
         {isLoading ? (
-          <p className="rounded-2xl border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
-            กำลังโหลดข้อมูลลูกค้า
-          </p>
+          customerSkeletonRows.map((row) => <CustomerCardSkeleton key={row} />)
         ) : null}
 
         {!isLoading && customers.length === 0 ? (
@@ -432,6 +433,61 @@ function CustomerTable({
           ))}
       </div>
     </>
+  )
+}
+
+function CustomerTableSkeletonRows() {
+  return (
+    <>
+      {customerSkeletonRows.map((row) => (
+        <tr className="align-middle" key={row}>
+          <td className="px-5 py-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <SkeletonBlock className="size-12 shrink-0 rounded-2xl" />
+              <div className="min-w-0">
+                <SkeletonBlock className="h-4 w-36 rounded-xl" />
+                <SkeletonBlock className="mt-2 h-3 w-16 rounded-xl" />
+              </div>
+            </div>
+          </td>
+          <td className="px-5 py-4">
+            <SkeletonBlock className="h-4 w-20 rounded-xl" />
+          </td>
+          <td className="px-5 py-4">
+            <SkeletonBlock className="h-4 w-28 rounded-xl" />
+          </td>
+          <td className="px-5 py-4">
+            <SkeletonBlock className="h-4 w-36 rounded-xl" />
+          </td>
+          <td className="px-5 py-4">
+            <SkeletonBlock className="h-4 w-52 rounded-xl" />
+          </td>
+          <td className="px-5 py-4">
+            <SkeletonBlock className="ml-auto h-10 w-24 rounded-2xl" />
+          </td>
+        </tr>
+      ))}
+    </>
+  )
+}
+
+function CustomerCardSkeleton() {
+  return (
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-[#ead8c7] bg-white p-4 shadow-sm">
+      <div className="flex min-w-0 items-start gap-3">
+        <SkeletonBlock className="size-12 shrink-0 rounded-2xl" />
+        <div className="min-w-0 flex-1">
+          <SkeletonBlock className="h-5 w-40 max-w-full rounded-xl" />
+          <SkeletonBlock className="mt-2 h-4 w-44 max-w-full rounded-xl" />
+        </div>
+        <SkeletonBlock className="size-10 shrink-0 rounded-2xl" />
+      </div>
+
+      <div className="mt-4 grid min-w-0 gap-2">
+        <SkeletonBlock className="h-4 w-full rounded-xl" />
+        <SkeletonBlock className="h-4 w-4/5 rounded-xl" />
+      </div>
+    </article>
   )
 }
 

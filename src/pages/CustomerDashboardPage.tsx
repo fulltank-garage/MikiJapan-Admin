@@ -8,6 +8,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
+import { SkeletonBlock } from '../components/Skeleton'
 import { Snackbar } from '../components/Snackbar'
 import {
   isApiConfigured,
@@ -120,6 +121,7 @@ export function CustomerDashboardPage({
         helper: 'ผ่านการยืนยันแล้ว',
         icon: UsersRound,
         className: 'bg-[#fbf1e7] text-[#8f6847]',
+        isLoading: isLoadingCustomers,
       },
       {
         label: 'รอตรวจสอบ',
@@ -127,9 +129,10 @@ export function CustomerDashboardPage({
         helper: 'ใบสมัครใหม่',
         icon: Mail,
         className: 'bg-[#f4e7d9] text-[#6f5238]',
+        isLoading: false,
       },
     ]
-  }, [customers, pendingApplicationCount])
+  }, [customers, isLoadingCustomers, pendingApplicationCount])
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
@@ -240,9 +243,13 @@ export function CustomerDashboardPage({
                       <p className="text-[11px] font-medium leading-snug text-slate-500 sm:text-xs lg:text-sm">
                         {item.label}
                       </p>
-                      <p className="mt-1 text-xl font-semibold leading-7 text-slate-950 sm:mt-2 sm:text-2xl">
-                        {item.value}
-                      </p>
+                      {item.isLoading ? (
+                        <SkeletonBlock className="mt-2 h-7 w-16 rounded-xl" />
+                      ) : (
+                        <p className="mt-1 text-xl font-semibold leading-7 text-slate-950 sm:mt-2 sm:text-2xl">
+                          {item.value}
+                        </p>
+                      )}
                     </div>
                     <div
                       className={`hidden size-11 shrink-0 place-items-center rounded-2xl md:grid ${item.className}`}
@@ -265,9 +272,11 @@ export function CustomerDashboardPage({
                   ภาพรวมการจัดการ
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {isLoadingCustomers
-                    ? 'กำลังโหลดข้อมูลล่าสุด'
-                    : `มีสมาชิก ${numberFormatter.format(customers.length)} คน และใบสมัครรอตรวจสอบ ${numberFormatter.format(pendingApplicationCount)} รายการ`}
+                  {isLoadingCustomers ? (
+                    <SkeletonBlock className="h-5 w-full max-w-[22rem] rounded-xl" />
+                  ) : (
+                    `มีสมาชิก ${numberFormatter.format(customers.length)} คน และใบสมัครรอตรวจสอบ ${numberFormatter.format(pendingApplicationCount)} รายการ`
+                  )}
                 </p>
               </div>
 
