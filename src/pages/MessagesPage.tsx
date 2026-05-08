@@ -10,7 +10,6 @@ import {
   Menu,
   Phone,
   Search,
-  Trash2,
   UserRound,
   UsersRound,
   XCircle,
@@ -85,8 +84,15 @@ export function MessagesPage({
         const data = isApiConfigured ? await applicationApi.list() : []
 
         if (isMounted) {
+          const pendingApplications = data.filter(
+            (application) => application.status === 'pending',
+          )
           setCustomerApplications(data)
-          setSelectedApplicationId((current) => current || data[0]?.id || '')
+          setSelectedApplicationId((current) =>
+            pendingApplications.some((application) => application.id === current)
+              ? current
+              : pendingApplications[0]?.id || '',
+          )
         }
       } catch {
         if (isMounted) {
@@ -108,12 +114,15 @@ export function MessagesPage({
 
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
+    const pendingApplications = customerApplications.filter(
+      (application) => application.status === 'pending',
+    )
 
     if (!normalizedQuery) {
-      return customerApplications
+      return pendingApplications
     }
 
-    return customerApplications.filter((application) =>
+    return pendingApplications.filter((application) =>
       [
         application.firstName,
         application.lastName,
@@ -147,46 +156,30 @@ export function MessagesPage({
         ? await applicationApi.updateStatus(selectedApplication.id, status)
         : { ...selectedApplication, status }
 
-      setCustomerApplications((current) =>
-        current.map((application) =>
-          application.id === selectedApplication.id
-            ? updatedApplication
-            : application,
-        ),
+      const remainingPendingApplications = customerApplications.filter(
+        (application) =>
+          application.id !== selectedApplication.id &&
+          application.status === 'pending',
       )
-      setNotice(status === 'approved' ? 'ยืนยันการสมัครแล้ว' : 'ปฏิเสธการสมัครแล้ว')
+      setCustomerApplications((current) =>
+        status === 'approved'
+          ? current.map((application) =>
+              application.id === selectedApplication.id
+                ? updatedApplication
+                : application,
+            )
+          : current.filter(
+              (application) => application.id !== selectedApplication.id,
+            ),
+      )
+      setSelectedApplicationId(remainingPendingApplications[0]?.id || '')
+      setNotice(
+        status === 'approved'
+          ? 'ยืนยันการสมัครแล้ว ย้ายไปหน้า จัดการข้อมูลลูกค้าแล้ว'
+          : 'ปฏิเสธการสมัครแล้ว และลบข้อมูลออกจาก database แล้ว',
+      )
     } catch {
       setNotice('อัปเดตสถานะการสมัครไม่สำเร็จ')
-    }
-  }
-
-  const deleteSelectedApplication = async () => {
-    if (!selectedApplication) {
-      return
-    }
-
-    const shouldDelete = window.confirm(
-      'ต้องการลบข้อมูลการสมัครนี้ใช่ไหม? Rich Menu ของลูกค้าจะเปลี่ยนกลับเป็น Register',
-    )
-    if (!shouldDelete) {
-      return
-    }
-
-    setNotice('')
-
-    try {
-      if (isApiConfigured) {
-        await applicationApi.remove(selectedApplication.id)
-      }
-
-      const nextApplications = customerApplications.filter(
-        (application) => application.id !== selectedApplication.id,
-      )
-      setCustomerApplications(nextApplications)
-      setSelectedApplicationId(nextApplications[0]?.id || '')
-      setNotice('ลบข้อมูลการสมัครแล้ว และเปลี่ยน Rich Menu กลับเป็น Register')
-    } catch {
-      setNotice('ลบข้อมูลการสมัครไม่สำเร็จ')
     }
   }
 
@@ -324,7 +317,7 @@ export function MessagesPage({
                   {filteredApplications.map((application) => (
                     <button
                       className={`block w-full px-4 py-4 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
-                        selectedApplication.id === application.id
+                        selectedApplication?.id === application.id
                           ? 'bg-[#fbf1e7]/70'
                           : ''
                       }`}
@@ -394,14 +387,6 @@ export function MessagesPage({
                         >
                           <XCircle size={17} />
                           ปฏิเสธการสมัคร
-                        </button>
-                        <button
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8]"
-                          onClick={deleteSelectedApplication}
-                          type="button"
-                        >
-                          <Trash2 size={17} />
-                          ลบข้อมูล
                         </button>
                       </div>
                     </div>
