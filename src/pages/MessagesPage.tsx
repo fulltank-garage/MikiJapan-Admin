@@ -17,6 +17,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
+import { Snackbar } from '../components/Snackbar'
 import {
   applicationApi,
   isApiConfigured,
@@ -255,6 +256,8 @@ export function MessagesPage({
 
   return (
     <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+      <Snackbar message={notice} onClose={() => setNotice('')} />
+
       <MobileAdminMenu
         activePage="messages"
         isOpen={isMobileMenuOpen}
@@ -444,12 +447,6 @@ export function MessagesPage({
                         </button>
                     </div>
 
-                    {notice ? (
-                      <p className="mb-4 rounded-lg border border-[#ead8c7] bg-[#fff8f1] px-4 py-3 text-sm font-medium text-[#8f6847]">
-                        {notice}
-                      </p>
-                    ) : null}
-
                     <div className="mb-5 overflow-hidden rounded-lg border border-[#ead8c7] bg-[#fff8f1]">
                       {getStorefrontImageUrl(selectedApplication) ? (
                         <img
@@ -499,7 +496,7 @@ export function MessagesPage({
                   </>
                 ) : (
                   <div className="grid min-h-80 place-items-center rounded-lg border border-[#ead8c7] bg-[#fff8f1] px-5 text-center text-sm text-slate-500">
-                    {notice || 'เลือกข้อมูลการสมัครเพื่อดูรายละเอียด'}
+                    เลือกข้อมูลการสมัครเพื่อดูรายละเอียด
                   </div>
                 )}
               </article>

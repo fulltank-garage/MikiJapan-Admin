@@ -12,6 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
+import { Snackbar } from '../components/Snackbar'
 import { customerSeed } from '../data/customerSeed'
 import {
   applicationApi,
@@ -180,6 +181,8 @@ export function CustomerDashboardPage({
 
   return (
     <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+      <Snackbar message={notice} onClose={() => setNotice('')} />
+
       <MobileAdminMenu
         activePage="dashboard"
         isOpen={isMobileMenuOpen}
@@ -328,12 +331,6 @@ export function CustomerDashboardPage({
                 </label>
               </div>
             </div>
-
-            {notice ? (
-              <div className="border-b border-[#ead8c7] bg-[#fbf1e7] px-5 py-3 text-sm text-[#6f5238]">
-                {notice}
-              </div>
-            ) : null}
 
             <CustomerTable
               customers={filteredCustomers}

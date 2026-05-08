@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
+import { Snackbar } from '../components/Snackbar'
 import {
   applicationApi,
   isApiConfigured,
@@ -201,6 +202,8 @@ export function CustomerPage({
 
   return (
     <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+      <Snackbar message={notice} onClose={() => setNotice('')} />
+
       <MobileAdminMenu
         activePage="customers"
         isOpen={isMobileMenuOpen}
@@ -332,12 +335,6 @@ export function CustomerPage({
                 />
               </label>
             </div>
-
-            {notice ? (
-              <div className="border-b border-[#ead8c7] bg-[#fbf1e7] px-5 py-3 text-sm text-[#6f5238]">
-                {notice}
-              </div>
-            ) : null}
 
             <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-2">
               {isLoadingCustomers ? (

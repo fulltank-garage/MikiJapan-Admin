@@ -1,6 +1,7 @@
 import { ShieldCheck } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
+import { Snackbar } from '../components/Snackbar'
 import { authApi, type AuthSession, type LoginPayload } from '../services/api'
 
 type LoginPageProps = {
@@ -41,6 +42,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#fbf6f0] px-5 py-10 text-slate-900 sm:px-8">
+      <Snackbar message={error} onClose={() => setError('')} />
+
       <section className="w-full max-w-md">
         <form
           className="rounded-lg border border-[#ead8c7] bg-white p-6 shadow-sm sm:p-8"
@@ -88,12 +91,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               value={payload.password}
             />
           </label>
-
-          {error ? (
-            <p className="mb-4 rounded-lg border border-[#d8b8a7] bg-[#f8eee8] px-4 py-3 text-sm text-[#9a5f45]">
-              {error}
-            </p>
-          ) : null}
 
           <button
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#6f5238] px-4 font-semibold text-white transition hover:bg-[#7f6043] disabled:cursor-not-allowed disabled:opacity-70"
