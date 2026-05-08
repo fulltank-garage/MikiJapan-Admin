@@ -127,38 +127,38 @@ export function MessagesPage({
     return subscribeApplicationEvents({
       onStatus: setRealtimeStatus,
       onEvent: (event: MemberApplicationEvent) => {
-      try {
-        if (event.type === 'member_application.created') {
-          setCustomerApplications((current) =>
-            upsertApplication(current, event.data),
-          )
-          setSelectedApplicationId((current) => current || event.data.id)
-          return
-        }
+        try {
+          if (event.type === 'member_application.created') {
+            setCustomerApplications((current) =>
+              upsertApplication(current, event.data),
+            )
+            setSelectedApplicationId((current) => current || event.data.id)
+            return
+          }
 
-        if (event.type === 'member_application.updated') {
-          setCustomerApplications((current) =>
-            upsertApplication(current, event.data),
-          )
-          if (event.data.status !== 'pending') {
+          if (event.type === 'member_application.updated') {
+            setCustomerApplications((current) =>
+              upsertApplication(current, event.data),
+            )
+            if (event.data.status !== 'pending') {
+              setSelectedApplicationId((current) =>
+                current === event.data.id ? '' : current,
+              )
+            }
+            return
+          }
+
+          if (event.type === 'member_application.deleted') {
+            setCustomerApplications((current) =>
+              current.filter((application) => application.id !== event.data.id),
+            )
             setSelectedApplicationId((current) =>
               current === event.data.id ? '' : current,
             )
           }
-          return
+        } catch {
+          setNotice('รับข้อมูล realtime ไม่สำเร็จ')
         }
-
-        if (event.type === 'member_application.deleted') {
-          setCustomerApplications((current) =>
-            current.filter((application) => application.id !== event.data.id),
-          )
-          setSelectedApplicationId((current) =>
-            current === event.data.id ? '' : current,
-          )
-        }
-      } catch {
-        setNotice('รับข้อมูล realtime ไม่สำเร็จ')
-      }
       },
     })
   }, [])
@@ -255,7 +255,7 @@ export function MessagesPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+    <div className="min-h-dvh bg-[#fbf6f0] text-slate-900">
       <Snackbar message={notice} onClose={() => setNotice('')} />
 
       <MobileAdminMenu
@@ -269,7 +269,7 @@ export function MessagesPage({
         session={session}
       />
 
-      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white xl:flex">
         <div className="mb-9 flex items-center gap-3">
           <BrandLogo className="size-11 shrink-0" />
           <div>
@@ -325,14 +325,14 @@ export function MessagesPage({
         </div>
       </aside>
 
-      <div className="lg:pl-72">
-        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+      <div className="xl:pl-72">
+        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 lg:hidden"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
                 title="Menu"
                 type="button"
@@ -352,7 +352,7 @@ export function MessagesPage({
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8">
+        <main className="px-4 py-6 sm:px-6 xl:px-8">
           <section className="rounded-lg border border-[#ead8c7] bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
@@ -380,9 +380,9 @@ export function MessagesPage({
               </label>
             </div>
 
-            <div className="grid min-h-[34rem] xl:grid-cols-[minmax(360px,0.88fr)_1.12fr]">
-              <div className="border-b border-[#ead8c7] xl:border-b-0 xl:border-r">
-                <div className="divide-y divide-[#ead8c7]">
+            <div className="grid min-h-[34rem] lg:grid-cols-[minmax(320px,0.82fr)_1.18fr]">
+              <div className="border-b border-[#ead8c7] lg:border-b-0 lg:border-r">
+                <div className="max-h-[34rem] divide-y divide-[#ead8c7] overflow-y-auto lg:max-h-[calc(100dvh-14rem)]">
                   {filteredApplications.map((application) => (
                     <button
                       className={`block w-full px-4 py-4 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
@@ -395,11 +395,7 @@ export function MessagesPage({
                       type="button"
                     >
                       <div className="flex items-center gap-3">
-                        <img
-                          alt={`หน้าร้านของ ${getApplicationFullName(application)}`}
-                          className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
-                          src={getStorefrontImageUrl(application)}
-                        />
+                        <ApplicationThumb application={application} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-semibold text-slate-950">
                             {getApplicationFullName(application)}
@@ -426,25 +422,25 @@ export function MessagesPage({
               <article className="p-5">
                 {selectedApplication ? (
                   <>
-                    <div className="mb-5 flex flex-wrap items-center justify-end gap-2">
-                        <button
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
-                          disabled={selectedApplication.status === 'approved'}
-                          onClick={() => updateApplicationStatus('approved')}
-                          type="button"
-                        >
-                          <CheckCircle2 size={17} />
-                          ยืนยันการสมัคร
-                        </button>
-                        <button
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
-                          disabled={selectedApplication.status === 'rejected'}
-                          onClick={() => updateApplicationStatus('rejected')}
-                          type="button"
-                        >
-                          <XCircle size={17} />
-                          ปฏิเสธการสมัคร
-                        </button>
+                    <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                      <button
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
+                        disabled={selectedApplication.status === 'approved'}
+                        onClick={() => updateApplicationStatus('approved')}
+                        type="button"
+                      >
+                        <CheckCircle2 size={17} />
+                        ยืนยันการสมัคร
+                      </button>
+                      <button
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
+                        disabled={selectedApplication.status === 'rejected'}
+                        onClick={() => updateApplicationStatus('rejected')}
+                        type="button"
+                      >
+                        <XCircle size={17} />
+                        ปฏิเสธการสมัคร
+                      </button>
                     </div>
 
                     <div className="mb-5 overflow-hidden rounded-lg border border-[#ead8c7] bg-[#fff8f1]">
@@ -461,7 +457,7 @@ export function MessagesPage({
                       )}
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <InfoItem
                         icon={UserRound}
                         label="ชื่อ"
@@ -545,6 +541,32 @@ function LinkItem({ icon: Icon, label, value }: InfoItemProps) {
         <ExternalLink className="shrink-0" size={15} />
       </a>
     </div>
+  )
+}
+
+function ApplicationThumb({
+  application,
+}: {
+  application: MemberApplication
+}) {
+  const imageUrl = getStorefrontImageUrl(application)
+  const [hasImageError, setHasImageError] = useState(false)
+
+  if (!imageUrl || hasImageError) {
+    return (
+      <div className="grid size-12 shrink-0 place-items-center rounded-lg border border-[#ead8c7] bg-[#f3e8dd] text-slate-600">
+        <UserRound size={20} />
+      </div>
+    )
+  }
+
+  return (
+    <img
+      alt={`หน้าร้านของ ${getApplicationFullName(application)}`}
+      className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
+      onError={() => setHasImageError(true)}
+      src={imageUrl}
+    />
   )
 }
 

@@ -41,16 +41,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#fbf6f0] px-5 py-10 text-slate-900 sm:px-8">
+    <main className="flex min-h-dvh items-center justify-center bg-[#fbf6f0] px-4 py-8 text-slate-900 sm:px-8 sm:py-10">
       <Snackbar message={error} onClose={() => setError('')} />
 
       <section className="w-full max-w-md">
         <form
-          className="rounded-lg border border-[#ead8c7] bg-white p-6 shadow-sm sm:p-8"
+          className="rounded-lg border border-[#ead8c7] bg-white p-5 shadow-sm sm:p-8"
           onSubmit={handleSubmit}
         >
           <div className="mb-8 flex flex-col items-center text-center">
-            <BrandLogo className="size-20 shrink-0" />
+            <BrandLogo className="size-16 shrink-0 sm:size-20" />
             <h1 className="mt-4 text-2xl font-semibold text-slate-950">
               MikiJapan Admin
             </h1>
@@ -62,6 +62,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </span>
             <input
               className="h-12 w-full rounded-lg border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
+              autoCapitalize="none"
+              autoComplete="username"
+              inputMode="email"
               onChange={(event) =>
                 setPayload((current) => ({
                   ...current,
@@ -69,7 +72,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 }))
               }
               placeholder="กรอกอีเมล"
-              type="email"
+              type="text"
               value={payload.email}
             />
           </label>
@@ -80,6 +83,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </span>
             <input
               className="h-12 w-full rounded-lg border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
+              autoComplete="current-password"
               onChange={(event) =>
                 setPayload((current) => ({
                   ...current,

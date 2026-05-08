@@ -202,7 +202,7 @@ export function CustomerPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#fbf6f0] text-slate-900">
+    <div className="min-h-dvh bg-[#fbf6f0] text-slate-900">
       <Snackbar message={notice} onClose={() => setNotice('')} />
 
       <MobileAdminMenu
@@ -216,7 +216,7 @@ export function CustomerPage({
         session={session}
       />
 
-      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-72 flex-col bg-[#6f5238] px-5 py-6 text-white xl:flex">
         <div className="mb-9 flex items-center gap-3">
           <BrandLogo className="size-11 shrink-0" />
           <div>
@@ -269,14 +269,14 @@ export function CustomerPage({
         </div>
       </aside>
 
-      <div className="lg:pl-72">
-        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+      <div className="xl:pl-72">
+        <header className="sticky top-0 z-20 border-b border-[#ead8c7] bg-white/95 px-4 py-4 backdrop-blur sm:px-6 xl:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 lg:hidden"
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
                 title="เมนู"
                 type="button"
@@ -296,7 +296,7 @@ export function CustomerPage({
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8">
+        <main className="px-4 py-6 sm:px-6 xl:px-8">
           <section className="grid gap-4 md:grid-cols-3">
             <SummaryCard
               label="ลูกค้าที่เป็น Member"
@@ -371,8 +371,8 @@ function CustomerTable({
 }: CustomerTableProps) {
   return (
     <>
-      <div className="hidden overflow-x-auto lg:block">
-        <table className="w-full min-w-[980px] border-collapse text-left">
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[900px] border-collapse text-left">
           <thead className="bg-[#fff8f1] text-xs font-semibold uppercase text-slate-500">
             <tr>
               <th className="px-5 py-3">ลูกค้า</th>
@@ -436,7 +436,7 @@ function CustomerTable({
         </table>
       </div>
 
-      <div className="grid gap-3 p-4 lg:hidden">
+      <div className="grid gap-3 p-4 md:hidden">
         {isLoading ? (
           <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
             กำลังโหลดข้อมูลลูกค้า
@@ -506,8 +506,9 @@ function CustomerTableMessage({
 
 function StorefrontThumb({ customer }: { customer: MemberApplication }) {
   const imageUrl = getStorefrontImageUrl(customer)
+  const [hasImageError, setHasImageError] = useState(false)
 
-  if (!imageUrl) {
+  if (!imageUrl || hasImageError) {
     return (
       <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
         <UserRound size={21} />
@@ -519,6 +520,7 @@ function StorefrontThumb({ customer }: { customer: MemberApplication }) {
     <img
       alt={`รูปหน้าร้านของ ${getApplicationFullName(customer)}`}
       className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
+      onError={() => setHasImageError(true)}
       src={imageUrl}
     />
   )
@@ -532,7 +534,7 @@ function CustomerShopLink({ value }: { value: string }) {
       rel="noreferrer"
       target="_blank"
     >
-      <span className="min-w-0 truncate lg:max-w-64">{value}</span>
+      <span className="min-w-0 truncate md:max-w-56 xl:max-w-64">{value}</span>
       <ExternalLink className="shrink-0" size={14} />
     </a>
   )

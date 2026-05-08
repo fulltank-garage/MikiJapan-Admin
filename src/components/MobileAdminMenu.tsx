@@ -70,11 +70,11 @@ export function MobileAdminMenu({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-[#3f2e23]/60 backdrop-blur-sm lg:hidden"
+      className="fixed inset-0 z-50 bg-[#3f2e23]/60 backdrop-blur-sm xl:hidden"
       role="dialog"
     >
       <div className="flex min-h-full">
-        <aside className="flex max-h-screen w-[min(20rem,86vw)] flex-col overflow-y-auto bg-[#6f5238] px-5 py-5 text-white shadow-2xl">
+        <aside className="flex max-h-dvh w-[min(21rem,88vw)] flex-col overflow-y-auto bg-[#6f5238] px-5 py-5 text-white shadow-2xl">
           <div className="mb-8 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <BrandLogo className="size-11 shrink-0" />
@@ -88,7 +88,7 @@ export function MobileAdminMenu({
             <button
               className="grid size-10 place-items-center rounded-lg border border-[#ead8c7]/25 bg-white/10 text-[#f5e7d8] transition hover:bg-white/15"
               onClick={onClose}
-              title="Close menu"
+              title="ปิดเมนู"
               type="button"
             >
               <X size={20} />
@@ -133,7 +133,7 @@ export function MobileAdminMenu({
           </div>
         </aside>
         <button
-          aria-label="Close menu"
+          aria-label="ปิดเมนู"
           className="min-h-full flex-1"
           onClick={onClose}
           type="button"
