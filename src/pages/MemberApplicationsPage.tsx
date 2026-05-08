@@ -111,6 +111,7 @@ export function MemberApplicationsPage({
   const [isLoadingApplications, setIsLoadingApplications] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
+  const [expandedApplicationId, setExpandedApplicationId] = useState('')
   const [notice, setNotice] = useState('')
   const [pendingStatusChange, setPendingStatusChange] =
     useState<PendingStatusChange | null>(null)
@@ -165,6 +166,9 @@ export function MemberApplicationsPage({
               setSelectedApplicationId((current) =>
                 current === event.data.id ? '' : current,
               )
+              setExpandedApplicationId((current) =>
+                current === event.data.id ? '' : current,
+              )
             }
             return
           }
@@ -174,6 +178,9 @@ export function MemberApplicationsPage({
               current.filter((application) => application.id !== event.data.id),
             )
             setSelectedApplicationId((current) =>
+              current === event.data.id ? '' : current,
+            )
+            setExpandedApplicationId((current) =>
               current === event.data.id ? '' : current,
             )
           }
@@ -228,6 +235,13 @@ export function MemberApplicationsPage({
     filteredApplications[0] ||
     null
 
+  const openApplicationDetail = (applicationId: string) => {
+    setSelectedApplicationId(applicationId)
+    setExpandedApplicationId((current) =>
+      current === applicationId ? '' : applicationId,
+    )
+  }
+
   const updateApplicationStatus = async (
     application: MemberApplication,
     status: ApplicationStatus,
@@ -257,6 +271,7 @@ export function MemberApplicationsPage({
             ),
       )
       setSelectedApplicationId(remainingPendingApplications[0]?.id || '')
+      setExpandedApplicationId('')
       setNotice(
         status === 'approved'
           ? 'ยืนยันการสมัครแล้ว ย้ายไปหน้า จัดการข้อมูลลูกค้าแล้ว'
@@ -271,6 +286,100 @@ export function MemberApplicationsPage({
     ? getApplicationFullName(pendingStatusChange.application)
     : ''
   const isApprovingApplication = pendingStatusChange?.status === 'approved'
+  const renderApplicationDetail = (
+    application: MemberApplication,
+    variant: 'inline' | 'panel',
+  ) => (
+    <>
+      <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <ApplicationThumb
+            application={application}
+            className="size-14"
+            iconSize={22}
+          />
+          <div className="min-w-0">
+            <p className="truncate text-lg font-semibold text-slate-950">
+              {getApplicationFullName(application)}
+            </p>
+            <p className="mt-0.5 truncate text-sm text-slate-500">
+              {application.nickname} · {application.phone}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <button
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
+            disabled={application.status === 'approved'}
+            onClick={() =>
+              setPendingStatusChange({
+                application,
+                status: 'approved',
+              })
+            }
+            type="button"
+          >
+            <CheckCircle2 size={17} />
+            <span className="hidden sm:inline">ยืนยันการสมัคร</span>
+            <span className="sm:hidden">ยืนยัน</span>
+          </button>
+          <button
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
+            disabled={application.status === 'rejected'}
+            onClick={() =>
+              setPendingStatusChange({
+                application,
+                status: 'rejected',
+              })
+            }
+            type="button"
+          >
+            <XCircle size={17} />
+            <span className="hidden sm:inline">ปฏิเสธการสมัคร</span>
+            <span className="sm:hidden">ปฏิเสธ</span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        className={`grid gap-4 ${
+          variant === 'inline'
+            ? 'md:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]'
+            : 'xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]'
+        }`}
+      >
+        <StorefrontPreview application={application} />
+
+        <div
+          className={`grid gap-2 ${
+            variant === 'inline'
+              ? 'sm:grid-cols-2 md:grid-cols-1'
+              : 'sm:grid-cols-2 xl:grid-cols-1'
+          }`}
+        >
+          <InfoItem icon={UserRound} label="ชื่อ" value={application.firstName} />
+          <InfoItem
+            icon={UserRound}
+            label="นามสกุล"
+            value={application.lastName}
+          />
+          <InfoItem
+            icon={UserRound}
+            label="ชื่อเล่น"
+            value={application.nickname}
+          />
+          <InfoItem icon={Phone} label="เบอร์โทร" value={application.phone} />
+          <InfoItem
+            icon={IdCard}
+            label="เลขบัตรประชาชน"
+            value={application.citizenId}
+          />
+          <LinkItem icon={Link2} label="ลิงก์ร้าน" value={application.shopPageUrl} />
+        </div>
+      </div>
+    </>
+  )
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#fbf6f0] text-slate-900">
@@ -430,34 +539,51 @@ export function MemberApplicationsPage({
 
             <div className="grid lg:min-h-[34rem] lg:grid-cols-[minmax(320px,0.75fr)_minmax(0,1.25fr)]">
               <div className="border-b border-[#ead8c7] lg:border-b-0 lg:border-r">
-                <div className="max-h-[18rem] divide-y divide-[#ead8c7] overflow-y-auto sm:max-h-[24rem] lg:max-h-[calc(100dvh-14rem)]">
+                <div className="divide-y divide-[#ead8c7] lg:max-h-[calc(100dvh-14rem)] lg:overflow-y-auto">
                   {isLoadingApplications ? (
                     <ApplicationListSkeleton />
                   ) : (
                     filteredApplications.map((application) => (
-                      <button
-                        className={`block w-full min-w-0 px-4 py-3 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
-                          selectedApplication?.id === application.id
-                            ? 'bg-[#fbf1e7]/80 shadow-[inset_4px_0_0_#9a7655]'
-                            : ''
-                        }`}
-                        key={application.id}
-                        onClick={() => setSelectedApplicationId(application.id)}
-                        type="button"
-                      >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <ApplicationThumb application={application} />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate font-semibold text-slate-950">
-                              {getApplicationFullName(application)}
-                            </p>
-                            <p className="mt-1 truncate text-sm text-slate-500">
-                              {application.nickname} · {application.phone}
-                            </p>
+                      <div key={application.id}>
+                        <button
+                          aria-expanded={
+                            expandedApplicationId === application.id
+                          }
+                          className={`block w-full min-w-0 px-4 py-3 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
+                            selectedApplication?.id === application.id
+                              ? 'bg-[#fbf1e7]/80 shadow-[inset_4px_0_0_#9a7655]'
+                              : ''
+                          }`}
+                          onClick={() => openApplicationDetail(application.id)}
+                          type="button"
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <ApplicationThumb application={application} />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate font-semibold text-slate-950">
+                                {getApplicationFullName(application)}
+                              </p>
+                              <p className="mt-1 truncate text-sm text-slate-500">
+                                {application.nickname} · {application.phone}
+                              </p>
+                            </div>
+                            <ApplicationStatusBadge status={application.status} />
                           </div>
-                          <ApplicationStatusBadge status={application.status} />
+                        </button>
+
+                        <div
+                          aria-hidden={expandedApplicationId !== application.id}
+                          className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out lg:hidden ${
+                            expandedApplicationId === application.id
+                              ? 'max-h-[120rem] opacity-100'
+                              : 'invisible max-h-0 opacity-0'
+                          }`}
+                        >
+                          <div className="px-4 pb-5 pt-3 sm:px-5">
+                            {renderApplicationDetail(application, 'inline')}
+                          </div>
                         </div>
-                      </button>
+                      </div>
                     ))
                   )}
 
@@ -469,104 +595,11 @@ export function MemberApplicationsPage({
                 </div>
               </div>
 
-              <article className="min-w-0 p-4 sm:p-5">
+              <article className="hidden min-w-0 p-5 lg:block">
                 {isLoadingApplications ? (
                   <ApplicationDetailSkeleton />
                 ) : selectedApplication ? (
-                  <>
-                    <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <ApplicationThumb
-                          application={selectedApplication}
-                          className="size-14"
-                          iconSize={22}
-                        />
-                        <div className="min-w-0">
-                          <p className="truncate text-lg font-semibold text-slate-950">
-                            {getApplicationFullName(selectedApplication)}
-                          </p>
-                          <p className="mt-0.5 truncate text-sm text-slate-500">
-                            {selectedApplication.nickname} ·{' '}
-                            {selectedApplication.phone}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
-                        <button
-                          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
-                          disabled={selectedApplication.status === 'approved'}
-                          onClick={() =>
-                            setPendingStatusChange({
-                              application: selectedApplication,
-                              status: 'approved',
-                            })
-                          }
-                          type="button"
-                        >
-                          <CheckCircle2 size={17} />
-                          <span className="hidden sm:inline">
-                            ยืนยันการสมัคร
-                          </span>
-                          <span className="sm:hidden">ยืนยัน</span>
-                        </button>
-                        <button
-                          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
-                          disabled={selectedApplication.status === 'rejected'}
-                          onClick={() =>
-                            setPendingStatusChange({
-                              application: selectedApplication,
-                              status: 'rejected',
-                            })
-                          }
-                          type="button"
-                        >
-                          <XCircle size={17} />
-                          <span className="hidden sm:inline">
-                            ปฏิเสธการสมัคร
-                          </span>
-                          <span className="sm:hidden">ปฏิเสธ</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-                      <StorefrontPreview application={selectedApplication} />
-
-                      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                        <InfoItem
-                          icon={UserRound}
-                          label="ชื่อ"
-                          value={selectedApplication.firstName}
-                        />
-                        <InfoItem
-                          icon={UserRound}
-                          label="นามสกุล"
-                          value={selectedApplication.lastName}
-                        />
-                        <InfoItem
-                          icon={UserRound}
-                          label="ชื่อเล่น"
-                          value={selectedApplication.nickname}
-                        />
-                        <InfoItem
-                          icon={Phone}
-                          label="เบอร์โทร"
-                          value={selectedApplication.phone}
-                        />
-                        <InfoItem
-                          icon={IdCard}
-                          label="เลขบัตรประชาชน"
-                          value={selectedApplication.citizenId}
-                        />
-                        <LinkItem
-                          icon={Link2}
-                          label="ลิงก์ร้าน"
-                          value={selectedApplication.shopPageUrl}
-                        />
-                      </div>
-                    </div>
-                  </>
+                  renderApplicationDetail(selectedApplication, 'panel')
                 ) : (
                   <div className="grid min-h-80 place-items-center rounded-2xl border border-[#ead8c7] bg-[#fff8f1] px-5 text-center text-sm text-slate-500">
                     เลือกข้อมูลการสมัครเพื่อดูรายละเอียด
