@@ -17,8 +17,10 @@ import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import {
   applicationApi,
+  createApplicationEventsSocket,
   isApiConfigured,
   type AuthSession,
+  type MemberApplicationEvent,
   type MemberApplication,
 } from '../services/api'
 import { numberFormatter } from '../utils/formatters'
@@ -35,6 +37,23 @@ const getApplicationFullName = (application: MemberApplication) =>
 
 const getStorefrontImageUrl = (application: MemberApplication) =>
   application.storefrontImageUrl || application.storefrontImage || ''
+
+const upsertCustomer = (
+  customers: MemberApplication[],
+  nextCustomer: MemberApplication,
+) => {
+  const existingIndex = customers.findIndex(
+    (customer) => customer.id === nextCustomer.id,
+  )
+
+  if (existingIndex === -1) {
+    return [nextCustomer, ...customers]
+  }
+
+  return customers.map((customer) =>
+    customer.id === nextCustomer.id ? nextCustomer : customer,
+  )
+}
 
 export function CustomerPage({
   onLogout,
@@ -79,6 +98,46 @@ export function CustomerPage({
 
     return () => {
       isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const socket = createApplicationEventsSocket()
+    if (!socket) {
+      return
+    }
+
+    socket.onmessage = (message) => {
+      try {
+        const event = JSON.parse(message.data) as MemberApplicationEvent
+
+        if (
+          event.type === 'member_application.updated' &&
+          event.data.status === 'approved'
+        ) {
+          setCustomers((current) => upsertCustomer(current, event.data))
+          return
+        }
+
+        if (
+          event.type === 'member_application.deleted' ||
+          event.data.status !== 'approved'
+        ) {
+          setCustomers((current) =>
+            current.filter((customer) => customer.id !== event.data.id),
+          )
+        }
+      } catch {
+        setNotice('รับข้อมูล realtime ไม่สำเร็จ')
+      }
+    }
+
+    socket.onerror = () => {
+      setNotice('เชื่อมต่อ realtime ไม่สำเร็จ')
+    }
+
+    return () => {
+      socket.close()
     }
   }, [])
 

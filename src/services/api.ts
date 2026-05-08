@@ -32,6 +32,14 @@ export type MemberApplication = {
   status: ApplicationStatus
 }
 
+export type MemberApplicationEvent = {
+  type:
+    | 'member_application.created'
+    | 'member_application.updated'
+    | 'member_application.deleted'
+  data: MemberApplication
+}
+
 export type LoginPayload = {
   email: string
   password: string
@@ -126,4 +134,23 @@ export const applicationApi = {
   async remove(id: string) {
     await api.delete(`/members/${id}`)
   },
+}
+
+export const createApplicationEventsSocket = () => {
+  if (!isApiConfigured) {
+    return null
+  }
+
+  const token = localStorage.getItem('admin_token')
+  if (!token) {
+    return null
+  }
+
+  const baseUrl = new URL(apiBaseUrl)
+  baseUrl.protocol = baseUrl.protocol === 'https:' ? 'wss:' : 'ws:'
+  baseUrl.pathname = `${baseUrl.pathname.replace(/\/$/, '')}/members/events`
+  baseUrl.search = ''
+  baseUrl.searchParams.set('token', token)
+
+  return new WebSocket(baseUrl.toString())
 }

@@ -19,9 +19,11 @@ import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import {
   applicationApi,
+  createApplicationEventsSocket,
   isApiConfigured,
   type ApplicationStatus,
   type AuthSession,
+  type MemberApplicationEvent,
   type MemberApplication,
 } from '../services/api'
 
@@ -58,6 +60,23 @@ const getApplicationFullName = (application: MemberApplication) =>
 
 const getStorefrontImageUrl = (application: MemberApplication) =>
   application.storefrontImageUrl || application.storefrontImage || ''
+
+const upsertApplication = (
+  applications: MemberApplication[],
+  nextApplication: MemberApplication,
+) => {
+  const existingIndex = applications.findIndex(
+    (application) => application.id === nextApplication.id,
+  )
+
+  if (existingIndex === -1) {
+    return [nextApplication, ...applications]
+  }
+
+  return applications.map((application) =>
+    application.id === nextApplication.id ? nextApplication : application,
+  )
+}
 
 export function MessagesPage({
   onBackToDashboard,
@@ -109,6 +128,58 @@ export function MessagesPage({
 
     return () => {
       isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const socket = createApplicationEventsSocket()
+    if (!socket) {
+      return
+    }
+
+    socket.onmessage = (message) => {
+      try {
+        const event = JSON.parse(message.data) as MemberApplicationEvent
+
+        if (event.type === 'member_application.created') {
+          setCustomerApplications((current) =>
+            upsertApplication(current, event.data),
+          )
+          setSelectedApplicationId((current) => current || event.data.id)
+          return
+        }
+
+        if (event.type === 'member_application.updated') {
+          setCustomerApplications((current) =>
+            upsertApplication(current, event.data),
+          )
+          if (event.data.status !== 'pending') {
+            setSelectedApplicationId((current) =>
+              current === event.data.id ? '' : current,
+            )
+          }
+          return
+        }
+
+        if (event.type === 'member_application.deleted') {
+          setCustomerApplications((current) =>
+            current.filter((application) => application.id !== event.data.id),
+          )
+          setSelectedApplicationId((current) =>
+            current === event.data.id ? '' : current,
+          )
+        }
+      } catch {
+        setNotice('รับข้อมูล realtime ไม่สำเร็จ')
+      }
+    }
+
+    socket.onerror = () => {
+      setNotice('เชื่อมต่อ realtime ไม่สำเร็จ')
+    }
+
+    return () => {
+      socket.close()
     }
   }, [])
 
