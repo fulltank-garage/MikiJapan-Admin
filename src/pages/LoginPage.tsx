@@ -9,7 +9,7 @@ type LoginPageProps = {
 
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [payload, setPayload] = useState<LoginPayload>({
-    email: 'admin@mikijapan.local',
+    email: '',
     password: '',
   })
   const [error, setError] = useState('')
@@ -40,55 +40,17 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   }
 
   return (
-    <main className="grid min-h-screen bg-[#fbf6f0] text-slate-900 lg:grid-cols-[minmax(360px,0.9fr)_1.1fr]">
-      <section className="flex min-h-[36rem] flex-col justify-between bg-[#6f5238] px-6 py-8 text-white sm:px-10 lg:min-h-screen lg:px-12">
-        <div className="flex items-center gap-3">
-          <BrandLogo className="size-12 shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
-            <h1 className="text-2xl font-semibold">Admin Console</h1>
-          </div>
-        </div>
-
-        <div className="max-w-xl py-14">
-          <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-[#fff8f1]">
-            Customer Operations
-          </p>
-          <h2 className="text-4xl font-semibold leading-tight sm:text-5xl">
-            จัดการข้อมูลลูกค้าได้ในที่เดียว
-          </h2>
-          <div className="mt-10 grid gap-3 sm:grid-cols-3">
-            {[
-              ['1,248', 'ลูกค้า'],
-              ['94%', 'ติดตามสำเร็จ'],
-              ['24 ชม.', 'ตอบกลับเฉลี่ย'],
-            ].map(([value, label]) => (
-              <div
-                className="rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4"
-                key={label}
-              >
-                <p className="text-2xl font-semibold">{value}</p>
-                <p className="mt-1 text-sm text-[#f5dfc8]">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-sm text-slate-400">
-          Secured workspace for MikiJapan admin team
-        </p>
-      </section>
-
-      <section className="flex items-center justify-center px-5 py-10 sm:px-8">
+    <main className="flex min-h-screen items-center justify-center bg-[#fbf6f0] px-5 py-10 text-slate-900 sm:px-8">
+      <section className="w-full max-w-md">
         <form
-          className="w-full max-w-md rounded-lg border border-[#ead8c7] bg-white p-6 shadow-sm sm:p-8"
+          className="rounded-lg border border-[#ead8c7] bg-white p-6 shadow-sm sm:p-8"
           onSubmit={handleSubmit}
         >
-          <div className="mb-8">
-            <p className="text-sm font-medium text-[#8f6847]">เข้าสู่ระบบ</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-              Admin Login
-            </h2>
+          <div className="mb-8 flex flex-col items-center text-center">
+            <BrandLogo className="size-20 shrink-0" />
+            <h1 className="mt-4 text-2xl font-semibold text-slate-950">
+              MikiJapan Admin
+            </h1>
           </div>
 
           <label className="mb-5 block">
@@ -103,7 +65,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   email: event.target.value,
                 }))
               }
-              placeholder="admin@mikijapan.local"
+              placeholder="กรอกอีเมล"
               type="email"
               value={payload.email}
             />
