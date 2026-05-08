@@ -120,14 +120,11 @@ export function MobileAdminMenu({
             <div className="flex items-center gap-3">
               <BrandLogo className="size-11 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-[#f5dfc8]">
-                  MikiJapan
-                </p>
-                <p className="text-lg font-semibold">Admin</p>
+                <p className="text-lg font-semibold text-white">Miki Japan - ADMIN</p>
               </div>
             </div>
             <button
-              className="grid size-10 place-items-center rounded-lg border border-[#ead8c7]/25 bg-white/10 text-[#f5e7d8] transition hover:bg-white/15"
+              className="grid size-10 place-items-center rounded-2xl border border-[#ead8c7]/25 bg-white/10 text-[#f5e7d8] transition hover:bg-white/15"
               onClick={onClose}
               title="ปิดเมนู"
               type="button"
@@ -143,7 +140,7 @@ export function MobileAdminMenu({
 
               return (
                 <button
-                  className={`flex h-12 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium transition ${
+                  className={`flex h-12 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-medium transition ${
                     isActive
                       ? 'bg-[#f7eadc]/18 text-white'
                       : 'text-[#f5dfc8] hover:bg-white/10 hover:text-white'
@@ -164,7 +161,7 @@ export function MobileAdminMenu({
             })}
           </nav>
 
-          <div className="mt-auto rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4">
+          <div className="mt-auto rounded-2xl border border-[#ead8c7]/25 bg-white/10 p-4">
             <p className="text-sm font-medium text-white">
               {session.user.name}
             </p>

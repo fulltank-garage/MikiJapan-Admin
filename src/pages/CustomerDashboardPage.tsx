@@ -3,7 +3,6 @@ import {
   LogOut,
   Mail,
   Menu,
-  UserRound,
   UsersRound,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -149,10 +148,6 @@ export function CustomerDashboardPage({
   }, [])
 
   const stats = useMemo(() => {
-    const storefrontImageCount = customers.filter(
-      (customer) => customer.storefrontImageUrl || customer.storefrontImage,
-    ).length
-
     return [
       {
         label: 'สมาชิกทั้งหมด',
@@ -160,13 +155,6 @@ export function CustomerDashboardPage({
         helper: 'ผ่านการยืนยันแล้ว',
         icon: UsersRound,
         className: 'bg-[#fbf1e7] text-[#8f6847]',
-      },
-      {
-        label: 'มีรูปหน้าร้าน',
-        value: numberFormatter.format(storefrontImageCount),
-        helper: 'แนบรูปประกอบข้อมูล',
-        icon: UserRound,
-        className: 'bg-[#f7eadc] text-[#8f6847]',
       },
       {
         label: 'รอตรวจสอบ',
@@ -197,18 +185,17 @@ export function CustomerDashboardPage({
         <div className="mb-9 flex items-center gap-3">
           <BrandLogo className="size-11 shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
-            <p className="text-lg font-semibold">Admin</p>
+            <p className="text-lg font-semibold">Miki Japan - ADMIN</p>
           </div>
         </div>
 
         <nav className="space-y-2">
-          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
+          <button className="flex h-11 w-full items-center gap-3 rounded-2xl bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
             <LayoutDashboard size={18} />
             แดชบอร์ด
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenCustomers}
             type="button"
           >
@@ -216,7 +203,7 @@ export function CustomerDashboardPage({
             ข้อมูลลูกค้า
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenMessages}
             type="button"
           >
@@ -230,13 +217,13 @@ export function CustomerDashboardPage({
           </button>
         </nav>
 
-        <div className="mt-auto rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4">
+        <div className="mt-auto rounded-2xl border border-[#ead8c7]/25 bg-white/10 p-4">
           <p className="text-sm font-medium text-white">{session.user.name}</p>
           <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
           <button
-            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
+            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
             onClick={onLogout}
             type="button"
           >
@@ -253,7 +240,7 @@ export function CustomerDashboardPage({
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
+                className="grid size-10 place-items-center rounded-2xl border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
                 title="เมนู"
                 type="button"
@@ -274,13 +261,13 @@ export function CustomerDashboardPage({
         </header>
 
         <main className="max-w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-5 xl:px-8">
-          <section className="grid grid-cols-3 gap-2 sm:gap-4">
+          <section className="grid grid-cols-2 gap-2 sm:gap-4">
             {stats.map((item) => {
               const Icon = item.icon
 
               return (
                 <article
-                  className="min-w-0 rounded-lg border border-[#ead8c7] bg-white px-3 py-2.5 shadow-sm sm:p-4 lg:p-5"
+                  className="min-w-0 rounded-2xl border border-[#ead8c7] bg-white px-3 py-2.5 shadow-sm sm:p-4 lg:p-5"
                   key={item.label}
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3">
@@ -293,7 +280,7 @@ export function CustomerDashboardPage({
                       </p>
                     </div>
                     <div
-                      className={`hidden size-11 shrink-0 place-items-center rounded-lg md:grid ${item.className}`}
+                      className={`hidden size-11 shrink-0 place-items-center rounded-2xl md:grid ${item.className}`}
                     >
                       <Icon size={22} />
                     </div>
@@ -306,7 +293,7 @@ export function CustomerDashboardPage({
             })}
           </section>
 
-          <section className="mt-4 rounded-lg border border-[#ead8c7] bg-white p-4 shadow-sm sm:mt-5 sm:p-5">
+          <section className="mt-4 rounded-2xl border border-[#ead8c7] bg-white p-4 shadow-sm sm:mt-5 sm:p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
@@ -321,7 +308,7 @@ export function CustomerDashboardPage({
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#dbc6b2] bg-white px-4 text-sm font-semibold text-[#6f5238] transition hover:bg-[#fff8f1]"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#dbc6b2] bg-white px-4 text-sm font-semibold text-[#6f5238] transition hover:bg-[#fff8f1]"
                   onClick={onOpenCustomers}
                   type="button"
                 >
@@ -329,7 +316,7 @@ export function CustomerDashboardPage({
                   ไปหน้าข้อมูลลูกค้า
                 </button>
                 <button
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-4 text-sm font-semibold text-white transition hover:bg-[#8f6847]"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-4 text-sm font-semibold text-white transition hover:bg-[#8f6847]"
                   onClick={onOpenMessages}
                   type="button"
                 >

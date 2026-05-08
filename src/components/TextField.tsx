@@ -27,7 +27,7 @@ export function TextField({
         {label}
       </span>
       <input
-        className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
+        className="h-11 w-full rounded-2xl border border-[#dbc6b2] bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
         min={min}
         onChange={(event) =>
           onChange(

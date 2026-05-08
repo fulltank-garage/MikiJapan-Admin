@@ -23,7 +23,6 @@ import {
   type MemberApplication,
   type RealtimeStatus,
 } from '../services/api'
-import { numberFormatter } from '../utils/formatters'
 
 type CustomerPageProps = {
   onLogout: () => void
@@ -171,11 +170,6 @@ export function CustomerPage({
     )
   }, [customers, query])
 
-  const storefrontImageCount = useMemo(
-    () => customers.filter((customer) => getStorefrontImageUrl(customer)).length,
-    [customers],
-  )
-
   const handleDeleteCustomer = async (customer: MemberApplication) => {
     const confirmed = window.confirm(
       `ลบข้อมูลของ ${getApplicationFullName(customer)} หรือไม่? Rich Menu ของลูกค้าจะเปลี่ยนกลับเป็น Register`,
@@ -220,26 +214,25 @@ export function CustomerPage({
         <div className="mb-9 flex items-center gap-3">
           <BrandLogo className="size-11 shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
-            <p className="text-lg font-semibold">Admin</p>
+            <p className="text-lg font-semibold">Miki Japan - ADMIN</p>
           </div>
         </div>
 
         <nav className="space-y-2">
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenDashboard}
             type="button"
           >
             <LayoutDashboard size={18} />
             แดชบอร์ด
           </button>
-          <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
+          <button className="flex h-11 w-full items-center gap-3 rounded-2xl bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
             <UsersRound size={18} />
             ข้อมูลลูกค้า
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenMessages}
             type="button"
           >
@@ -253,13 +246,13 @@ export function CustomerPage({
           </button>
         </nav>
 
-        <div className="mt-auto rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4">
+        <div className="mt-auto rounded-2xl border border-[#ead8c7]/25 bg-white/10 p-4">
           <p className="text-sm font-medium text-white">{session.user.name}</p>
           <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
           <button
-            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
+            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
             onClick={onLogout}
             type="button"
           >
@@ -276,7 +269,7 @@ export function CustomerPage({
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
+                className="grid size-10 place-items-center rounded-2xl border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
                 title="เมนู"
                 type="button"
@@ -297,30 +290,12 @@ export function CustomerPage({
         </header>
 
         <main className="max-w-full overflow-x-hidden px-4 py-4 sm:px-6 sm:py-5 xl:px-8">
-          <section className="grid grid-cols-3 gap-2 sm:gap-4">
-            <SummaryCard
-              label="ลูกค้าที่เป็น Member"
-              value={numberFormatter.format(customers.length)}
-            />
-            <SummaryCard
-              label="มีรูปหน้าร้าน"
-              value={numberFormatter.format(storefrontImageCount)}
-            />
-            <SummaryCard
-              label="รายการที่แสดง"
-              value={numberFormatter.format(filteredCustomers.length)}
-            />
-          </section>
-
-          <section className="mt-4 max-w-full overflow-hidden rounded-lg border border-[#ead8c7] bg-white shadow-sm sm:mt-5">
+          <section className="max-w-full overflow-hidden rounded-2xl border border-[#ead8c7] bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
-                  รายชื่อลูกค้า
+                  รายชื่อลูกค้า Member
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  แสดงเฉพาะลูกค้าที่ผ่านการยืนยันการสมัครแล้ว
-                </p>
               </div>
 
               <label className="relative block min-w-0 xl:w-80">
@@ -329,7 +304,7 @@ export function CustomerPage({
                   size={18}
                 />
                 <input
-                  className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
+                  className="h-11 w-full rounded-2xl border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="ค้นหาชื่อ เบอร์โทร เลขบัตร"
                   value={query}
@@ -346,25 +321,6 @@ export function CustomerPage({
         </main>
       </div>
     </div>
-  )
-}
-
-function SummaryCard({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <article className="min-w-0 rounded-lg border border-[#ead8c7] bg-white px-3 py-2.5 shadow-sm sm:p-4 lg:p-5">
-      <p className="text-[11px] font-medium leading-snug text-slate-500 sm:text-xs lg:text-sm">
-        {label}
-      </p>
-      <p className="mt-1 text-xl font-semibold leading-7 text-slate-950 sm:mt-2 sm:text-2xl">
-        {value}
-      </p>
-    </article>
   )
 }
 
@@ -448,13 +404,13 @@ function CustomerTable({
 
       <div className="grid gap-3 p-4 lg:hidden">
         {isLoading ? (
-          <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
             กำลังโหลดข้อมูลลูกค้า
           </p>
         ) : null}
 
         {!isLoading && customers.length === 0 ? (
-          <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
             ไม่พบข้อมูลลูกค้าที่ผ่านการยืนยัน
           </p>
         ) : null}
@@ -462,7 +418,7 @@ function CustomerTable({
         {!isLoading &&
           customers.map((customer) => (
             <article
-              className="min-w-0 overflow-hidden rounded-lg border border-[#ead8c7] bg-white p-4 shadow-sm"
+              className="min-w-0 overflow-hidden rounded-2xl border border-[#ead8c7] bg-white p-4 shadow-sm"
               key={customer.id}
             >
               <div className="flex min-w-0 items-start gap-3">
@@ -520,7 +476,7 @@ function StorefrontThumb({ customer }: { customer: MemberApplication }) {
 
   if (!imageUrl || hasImageError) {
     return (
-      <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
+      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#f3e8dd] text-slate-600">
         <UserRound size={21} />
       </div>
     )
@@ -529,7 +485,7 @@ function StorefrontThumb({ customer }: { customer: MemberApplication }) {
   return (
     <img
       alt={`รูปหน้าร้านของ ${getApplicationFullName(customer)}`}
-      className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
+      className="size-12 shrink-0 rounded-2xl border border-[#ead8c7] object-cover"
       onError={() => setHasImageError(true)}
       src={imageUrl}
     />
@@ -564,7 +520,7 @@ function DeleteCustomerButton({
   return (
     <button
       aria-label={`ลบข้อมูลของ ${getApplicationFullName(customer)}`}
-      className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] ${
+      className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] ${
         iconOnly ? 'w-10 px-0' : 'px-3'
       }`}
       onClick={() => onDeleteCustomer(customer)}

@@ -22,11 +22,11 @@ export function Snackbar({ message, onClose }: SnackbarProps) {
 
   return (
     <div className="pointer-events-none fixed left-1/2 top-4 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 sm:top-5">
-      <div className="pointer-events-auto flex min-h-12 items-center gap-3 rounded-lg border border-[#d8c1a8] bg-[#6f5238] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-[#6f5238]/20">
+      <div className="pointer-events-auto flex min-h-12 items-center gap-3 rounded-2xl border border-[#d8c1a8] bg-[#6f5238] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-[#6f5238]/20">
         <span className="min-w-0 flex-1">{message}</span>
         <button
           aria-label="ปิดแจ้งเตือน"
-          className="grid size-7 shrink-0 place-items-center rounded-md text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
+          className="grid size-7 shrink-0 place-items-center rounded-xl text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
           onClick={onClose}
           type="button"
         >

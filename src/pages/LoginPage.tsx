@@ -46,13 +46,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
       <section className="w-full max-w-md">
         <form
-          className="rounded-lg border border-[#ead8c7] bg-white p-5 shadow-sm sm:p-8"
+          className="rounded-2xl border border-[#ead8c7] bg-white p-5 shadow-sm sm:p-8"
           onSubmit={handleSubmit}
         >
           <div className="mb-8 flex flex-col items-center text-center">
             <BrandLogo className="size-16 shrink-0 sm:size-20" />
             <h1 className="mt-4 text-2xl font-semibold text-slate-950">
-              MikiJapan Admin
+              Miki Japan - ADMIN
             </h1>
           </div>
 
@@ -61,7 +61,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               อีเมล
             </span>
             <input
-              className="h-12 w-full rounded-lg border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
+              className="h-12 w-full rounded-2xl border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
               autoCapitalize="none"
               autoComplete="username"
               inputMode="email"
@@ -82,7 +82,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               รหัสผ่าน
             </span>
             <input
-              className="h-12 w-full rounded-lg border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
+              className="h-12 w-full rounded-2xl border border-[#dbc6b2] bg-white px-4 text-slate-900 outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
               autoComplete="current-password"
               onChange={(event) =>
                 setPayload((current) => ({
@@ -97,7 +97,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </label>
 
           <button
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#6f5238] px-4 font-semibold text-white transition hover:bg-[#7f6043] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#6f5238] px-4 font-semibold text-white transition hover:bg-[#7f6043] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isLoading}
             type="submit"
           >

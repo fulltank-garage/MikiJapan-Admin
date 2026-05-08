@@ -273,14 +273,13 @@ export function MessagesPage({
         <div className="mb-9 flex items-center gap-3">
           <BrandLogo className="size-11 shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-[#f5dfc8]">MikiJapan</p>
-            <p className="text-lg font-semibold">Admin</p>
+            <p className="text-lg font-semibold">Miki Japan - ADMIN</p>
           </div>
         </div>
 
         <nav className="space-y-2">
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onBackToDashboard}
             type="button"
           >
@@ -288,7 +287,7 @@ export function MessagesPage({
             แดชบอร์ด
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
             onClick={onOpenCustomers}
             type="button"
           >
@@ -296,7 +295,7 @@ export function MessagesPage({
             ข้อมูลลูกค้า
           </button>
           <button
-            className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white"
+            className="flex h-11 w-full items-center gap-3 rounded-2xl bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white"
             type="button"
           >
             <Mail size={18} />
@@ -309,13 +308,13 @@ export function MessagesPage({
           </button>
         </nav>
 
-        <div className="mt-auto rounded-lg border border-[#ead8c7]/25 bg-white/10 p-4">
+        <div className="mt-auto rounded-2xl border border-[#ead8c7]/25 bg-white/10 p-4">
           <p className="text-sm font-medium text-white">{session.user.name}</p>
           <p className="mt-1 break-all text-xs text-[#f5dfc8]">
             {session.user.email}
           </p>
           <button
-            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
+            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#ead8c7]/25 bg-white/10 text-sm font-semibold text-white transition hover:bg-white/15"
             onClick={onLogout}
             type="button"
           >
@@ -332,7 +331,7 @@ export function MessagesPage({
               <button
                 aria-expanded={isMobileMenuOpen}
                 aria-label="เปิดเมนูหมวด"
-                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
+                className="grid size-10 place-items-center rounded-2xl border border-[#ead8c7] bg-white text-slate-700 xl:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
                 title="Menu"
                 type="button"
@@ -353,7 +352,7 @@ export function MessagesPage({
         </header>
 
         <main className="max-w-full overflow-x-hidden px-4 py-6 sm:px-6 xl:px-8">
-          <section className="max-w-full overflow-hidden rounded-lg border border-[#ead8c7] bg-white shadow-sm">
+          <section className="max-w-full overflow-hidden rounded-2xl border border-[#ead8c7] bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
@@ -372,7 +371,7 @@ export function MessagesPage({
                   size={18}
                 />
                 <input
-                  className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
+                  className="h-11 w-full rounded-2xl border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="ค้นหาข้อมูลการสมัคร"
                   value={query}
@@ -424,7 +423,7 @@ export function MessagesPage({
                   <>
                     <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                       <button
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
                         disabled={selectedApplication.status === 'approved'}
                         onClick={() => updateApplicationStatus('approved')}
                         type="button"
@@ -433,7 +432,7 @@ export function MessagesPage({
                         ยืนยันการสมัคร
                       </button>
                       <button
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
                         disabled={selectedApplication.status === 'rejected'}
                         onClick={() => updateApplicationStatus('rejected')}
                         type="button"
@@ -443,7 +442,7 @@ export function MessagesPage({
                       </button>
                     </div>
 
-                    <div className="mb-5 overflow-hidden rounded-lg border border-[#ead8c7] bg-[#fff8f1]">
+                    <div className="mb-5 overflow-hidden rounded-2xl border border-[#ead8c7] bg-[#fff8f1]">
                       {getStorefrontImageUrl(selectedApplication) ? (
                         <img
                           alt={`รูปหน้าร้านของ ${getApplicationFullName(selectedApplication)}`}
@@ -491,7 +490,7 @@ export function MessagesPage({
                     </div>
                   </>
                 ) : (
-                  <div className="grid min-h-80 place-items-center rounded-lg border border-[#ead8c7] bg-[#fff8f1] px-5 text-center text-sm text-slate-500">
+                  <div className="grid min-h-80 place-items-center rounded-2xl border border-[#ead8c7] bg-[#fff8f1] px-5 text-center text-sm text-slate-500">
                     เลือกข้อมูลการสมัครเพื่อดูรายละเอียด
                   </div>
                 )}
@@ -512,7 +511,7 @@ type InfoItemProps = {
 
 function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
   return (
-    <div className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-4">
+    <div className="rounded-2xl border border-[#ead8c7] bg-[#fff8f1] p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
         <Icon size={17} />
         {label}
@@ -526,7 +525,7 @@ function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
 
 function LinkItem({ icon: Icon, label, value }: InfoItemProps) {
   return (
-    <div className="min-w-0 rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-4">
+    <div className="min-w-0 rounded-2xl border border-[#ead8c7] bg-[#fff8f1] p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
         <Icon size={17} />
         {label}
@@ -556,7 +555,7 @@ function ApplicationThumb({
 
   if (!imageUrl || hasImageError) {
     return (
-      <div className="grid size-12 shrink-0 place-items-center rounded-lg border border-[#ead8c7] bg-[#f3e8dd] text-slate-600">
+      <div className="grid size-12 shrink-0 place-items-center rounded-2xl border border-[#ead8c7] bg-[#f3e8dd] text-slate-600">
         <UserRound size={20} />
       </div>
     )
@@ -565,7 +564,7 @@ function ApplicationThumb({
   return (
     <img
       alt={`หน้าร้านของ ${getApplicationFullName(application)}`}
-      className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
+      className="size-12 shrink-0 rounded-2xl border border-[#ead8c7] object-cover"
       onError={() => setHasImageError(true)}
       src={imageUrl}
     />
