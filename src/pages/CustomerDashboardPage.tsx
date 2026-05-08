@@ -3,7 +3,6 @@ import {
   LogOut,
   Mail,
   Menu,
-  Search,
   UserRound,
   UsersRound,
 } from 'lucide-react'
@@ -53,7 +52,6 @@ export function CustomerDashboardPage({
   session,
 }: CustomerDashboardPageProps) {
   const [customers, setCustomers] = useState<MemberApplication[]>([])
-  const [query, setQuery] = useState('')
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
@@ -149,24 +147,6 @@ export function CustomerDashboardPage({
       },
     })
   }, [])
-
-  const filteredCustomers = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-
-    return customers.filter((customer) =>
-      [
-        customer.firstName,
-        customer.lastName,
-        customer.nickname,
-        customer.phone,
-        customer.citizenId,
-        customer.shopPageUrl,
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(normalizedQuery),
-    )
-  }, [customers, query])
 
   const stats = useMemo(() => {
     const storefrontImageCount = customers.filter(
@@ -324,126 +304,41 @@ export function CustomerDashboardPage({
             })}
           </section>
 
-          <section className="mt-6 rounded-lg border border-[#ead8c7] bg-white shadow-sm">
-            <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
+          <section className="mt-6 rounded-lg border border-[#ead8c7] bg-white p-5 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
-                  รายชื่อลูกค้า
+                  ภาพรวมการจัดการ
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {numberFormatter.format(filteredCustomers.length)} รายการ
+                  {isLoadingCustomers
+                    ? 'กำลังโหลดข้อมูลล่าสุด'
+                    : `มีสมาชิก ${numberFormatter.format(customers.length)} คน และใบสมัครรอตรวจสอบ ${numberFormatter.format(pendingApplicationCount)} รายการ`}
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <label className="relative block min-w-0 sm:w-80">
-                  <Search
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                    size={18}
-                  />
-                  <input
-                    className="h-11 w-full rounded-lg border border-[#dbc6b2] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#9a7655] focus:ring-4 focus:ring-[#f1dfcd]"
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder="ค้นหาลูกค้า"
-                    value={query}
-                  />
-                </label>
+                <button
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#dbc6b2] bg-white px-4 text-sm font-semibold text-[#6f5238] transition hover:bg-[#fff8f1]"
+                  onClick={onOpenCustomers}
+                  type="button"
+                >
+                  <UsersRound size={18} />
+                  ไปหน้าข้อมูลลูกค้า
+                </button>
+                <button
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#9a7655] px-4 text-sm font-semibold text-white transition hover:bg-[#8f6847]"
+                  onClick={onOpenMessages}
+                  type="button"
+                >
+                  <Mail size={18} />
+                  ตรวจข้อมูลการสมัคร
+                </button>
               </div>
             </div>
-
-            <CustomerTable
-              customers={filteredCustomers}
-              isLoading={isLoadingCustomers}
-            />
           </section>
         </main>
       </div>
-    </div>
-  )
-}
-
-type CustomerTableProps = {
-  customers: MemberApplication[]
-  isLoading: boolean
-}
-
-function CustomerTable({ customers, isLoading }: CustomerTableProps) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] border-collapse text-left">
-        <thead className="bg-[#fff8f1] text-xs font-semibold uppercase text-slate-500">
-          <tr>
-            <th className="px-5 py-3">ลูกค้า</th>
-            <th className="px-5 py-3">ติดต่อ</th>
-            <th className="px-5 py-3">เลขบัตรประชาชน</th>
-            <th className="px-5 py-3">ลิงก์ร้าน</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#ead8c7]">
-          {isLoading ? (
-            <tr>
-              <td
-                className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={4}
-              >
-                กำลังโหลดข้อมูลลูกค้า
-              </td>
-            </tr>
-          ) : null}
-
-          {!isLoading && customers.length === 0 ? (
-            <tr>
-              <td
-                className="px-5 py-10 text-center text-sm text-slate-500"
-                colSpan={4}
-              >
-                ไม่พบข้อมูลที่ค้นหา
-              </td>
-            </tr>
-          ) : null}
-
-          {!isLoading &&
-            customers.map((customer) => (
-              <tr
-                className="align-top transition hover:bg-[#fff8f1]"
-                key={customer.id}
-              >
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
-                      <UserRound size={19} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-950">
-                        {`${customer.firstName} ${customer.lastName}`.trim()}
-                      </p>
-                      <p className="mt-1 max-w-52 truncate text-sm text-slate-500">
-                        {customer.nickname}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-4">
-                  <p className="text-sm text-slate-900">{customer.phone}</p>
-                  <p className="mt-1 text-sm text-slate-500">สมาชิก</p>
-                </td>
-                <td className="px-5 py-4 text-sm text-slate-700">
-                  {customer.citizenId}
-                </td>
-                <td className="px-5 py-4 text-sm text-slate-600">
-                  <a
-                    className="inline-block max-w-56 truncate font-medium text-[#8f6847] hover:text-[#6f5238]"
-                    href={customer.shopPageUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {customer.shopPageUrl}
-                  </a>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
     </div>
   )
 }

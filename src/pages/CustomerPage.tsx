@@ -1,12 +1,9 @@
 import {
   ExternalLink,
-  IdCard,
   LayoutDashboard,
-  Link2,
   LogOut,
   Mail,
   Menu,
-  Phone,
   Search,
   Trash2,
   UserRound,
@@ -340,94 +337,11 @@ export function CustomerPage({
               </label>
             </div>
 
-            <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-2">
-              {isLoadingCustomers ? (
-                <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500 xl:col-span-2">
-                  กำลังโหลดข้อมูลลูกค้า
-                </p>
-              ) : null}
-
-              {!isLoadingCustomers && filteredCustomers.length === 0 ? (
-                <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500 xl:col-span-2">
-                  ไม่พบข้อมูลลูกค้าที่ผ่านการยืนยัน
-                </p>
-              ) : null}
-
-              {!isLoadingCustomers &&
-                filteredCustomers.map((customer) => (
-                  <article
-                    className="overflow-hidden rounded-lg border border-[#ead8c7] bg-white shadow-sm"
-                    key={customer.id}
-                  >
-                    {getStorefrontImageUrl(customer) ? (
-                      <img
-                        alt={`รูปหน้าร้านของ ${getApplicationFullName(customer)}`}
-                        className="h-48 w-full object-cover"
-                        src={getStorefrontImageUrl(customer)}
-                      />
-                    ) : (
-                      <div className="grid h-48 place-items-center bg-[#fff8f1] px-5 text-center text-sm text-slate-500">
-                        ไม่มีรูปหน้าร้าน
-                      </div>
-                    )}
-
-                    <div className="p-5">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
-                            <UserRound size={22} />
-                          </div>
-                          <div className="min-w-0">
-                            <h3 className="truncate font-semibold text-slate-950">
-                              {getApplicationFullName(customer)}
-                            </h3>
-                            <p className="mt-1 truncate text-sm text-slate-500">
-                              {customer.nickname}
-                            </p>
-                          </div>
-                        </div>
-
-                        <button
-                          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8]"
-                          onClick={() => handleDeleteCustomer(customer)}
-                          type="button"
-                        >
-                          <Trash2 size={17} />
-                          ลบข้อมูล
-                        </button>
-                      </div>
-
-                      <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-                        <CustomerDetail
-                          icon={UserRound}
-                          label="ชื่อ"
-                          value={customer.firstName}
-                        />
-                        <CustomerDetail
-                          icon={UserRound}
-                          label="นามสกุล"
-                          value={customer.lastName}
-                        />
-                        <CustomerDetail
-                          icon={Phone}
-                          label="เบอร์โทร"
-                          value={customer.phone}
-                        />
-                        <CustomerDetail
-                          icon={IdCard}
-                          label="เลขบัตรประชาชน"
-                          value={customer.citizenId}
-                        />
-                        <CustomerLinkDetail
-                          icon={Link2}
-                          label="ลิงก์ร้าน"
-                          value={customer.shopPageUrl}
-                        />
-                      </div>
-                    </div>
-                  </article>
-                ))}
-            </div>
+            <CustomerTable
+              customers={filteredCustomers}
+              isLoading={isLoadingCustomers}
+              onDeleteCustomer={handleDeleteCustomer}
+            />
           </section>
         </main>
       </div>
@@ -444,50 +358,207 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   )
 }
 
-function CustomerDetail({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof UserRound
-  label: string
-  value: string
-}) {
+type CustomerTableProps = {
+  customers: MemberApplication[]
+  isLoading: boolean
+  onDeleteCustomer: (customer: MemberApplication) => void
+}
+
+function CustomerTable({
+  customers,
+  isLoading,
+  onDeleteCustomer,
+}: CustomerTableProps) {
   return (
-    <div className="rounded-lg bg-[#fff8f1] px-3 py-2">
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-        <Icon size={15} />
-        {label}
+    <>
+      <div className="hidden overflow-x-auto lg:block">
+        <table className="w-full min-w-[980px] border-collapse text-left">
+          <thead className="bg-[#fff8f1] text-xs font-semibold uppercase text-slate-500">
+            <tr>
+              <th className="px-5 py-3">ลูกค้า</th>
+              <th className="px-5 py-3">ชื่อเล่น</th>
+              <th className="px-5 py-3">เบอร์โทร</th>
+              <th className="px-5 py-3">เลขบัตรประชาชน</th>
+              <th className="px-5 py-3">ลิงก์ร้าน</th>
+              <th className="px-5 py-3 text-right">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#ead8c7]">
+            {isLoading ? (
+              <CustomerTableMessage colSpan={6} message="กำลังโหลดข้อมูลลูกค้า" />
+            ) : null}
+
+            {!isLoading && customers.length === 0 ? (
+              <CustomerTableMessage
+                colSpan={6}
+                message="ไม่พบข้อมูลลูกค้าที่ผ่านการยืนยัน"
+              />
+            ) : null}
+
+            {!isLoading &&
+              customers.map((customer) => (
+                <tr
+                  className="align-middle transition hover:bg-[#fff8f1]"
+                  key={customer.id}
+                >
+                  <td className="px-5 py-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <StorefrontThumb customer={customer} />
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-950">
+                          {getApplicationFullName(customer)}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">สมาชิก</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-sm text-slate-700">
+                    {customer.nickname}
+                  </td>
+                  <td className="px-5 py-4 text-sm text-slate-700">
+                    {customer.phone}
+                  </td>
+                  <td className="px-5 py-4 text-sm text-slate-700">
+                    {customer.citizenId}
+                  </td>
+                  <td className="px-5 py-4 text-sm text-slate-600">
+                    <CustomerShopLink value={customer.shopPageUrl} />
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <DeleteCustomerButton
+                      customer={customer}
+                      onDeleteCustomer={onDeleteCustomer}
+                    />
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
-      <p className="mt-1 break-words font-medium text-slate-800">{value}</p>
-    </div>
+
+      <div className="grid gap-3 p-4 lg:hidden">
+        {isLoading ? (
+          <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
+            กำลังโหลดข้อมูลลูกค้า
+          </p>
+        ) : null}
+
+        {!isLoading && customers.length === 0 ? (
+          <p className="rounded-lg border border-[#ead8c7] bg-[#fff8f1] p-6 text-center text-sm text-slate-500">
+            ไม่พบข้อมูลลูกค้าที่ผ่านการยืนยัน
+          </p>
+        ) : null}
+
+        {!isLoading &&
+          customers.map((customer) => (
+            <article
+              className="rounded-lg border border-[#ead8c7] bg-white p-4 shadow-sm"
+              key={customer.id}
+            >
+              <div className="flex items-start gap-3">
+                <StorefrontThumb customer={customer} />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-slate-950">
+                    {getApplicationFullName(customer)}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {customer.nickname} · {customer.phone}
+                  </p>
+                </div>
+                <DeleteCustomerButton
+                  customer={customer}
+                  iconOnly
+                  onDeleteCustomer={onDeleteCustomer}
+                />
+              </div>
+
+              <div className="mt-4 grid gap-2 text-sm">
+                <p className="break-words text-slate-700">
+                  เลขบัตรประชาชน: {customer.citizenId}
+                </p>
+                <CustomerShopLink value={customer.shopPageUrl} />
+              </div>
+            </article>
+          ))}
+      </div>
+    </>
   )
 }
 
-function CustomerLinkDetail({
-  icon: Icon,
-  label,
-  value,
+function CustomerTableMessage({
+  colSpan,
+  message,
 }: {
-  icon: typeof UserRound
-  label: string
-  value: string
+  colSpan: number
+  message: string
 }) {
   return (
-    <div className="rounded-lg bg-[#fff8f1] px-3 py-2 sm:col-span-2">
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-        <Icon size={15} />
-        {label}
-      </div>
-      <a
-        className="mt-1 inline-flex max-w-full items-center gap-2 break-all font-medium text-[#8f6847] hover:text-[#6f5238]"
-        href={value}
-        rel="noreferrer"
-        target="_blank"
+    <tr>
+      <td
+        className="px-5 py-10 text-center text-sm text-slate-500"
+        colSpan={colSpan}
       >
-        <span>{value}</span>
-        <ExternalLink className="shrink-0" size={14} />
-      </a>
-    </div>
+        {message}
+      </td>
+    </tr>
+  )
+}
+
+function StorefrontThumb({ customer }: { customer: MemberApplication }) {
+  const imageUrl = getStorefrontImageUrl(customer)
+
+  if (!imageUrl) {
+    return (
+      <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-[#f3e8dd] text-slate-600">
+        <UserRound size={21} />
+      </div>
+    )
+  }
+
+  return (
+    <img
+      alt={`รูปหน้าร้านของ ${getApplicationFullName(customer)}`}
+      className="size-12 shrink-0 rounded-lg border border-[#ead8c7] object-cover"
+      src={imageUrl}
+    />
+  )
+}
+
+function CustomerShopLink({ value }: { value: string }) {
+  return (
+    <a
+      className="inline-flex max-w-full items-center gap-2 break-all font-medium text-[#8f6847] hover:text-[#6f5238]"
+      href={value}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <span className="min-w-0 truncate lg:max-w-64">{value}</span>
+      <ExternalLink className="shrink-0" size={14} />
+    </a>
+  )
+}
+
+function DeleteCustomerButton({
+  customer,
+  iconOnly = false,
+  onDeleteCustomer,
+}: {
+  customer: MemberApplication
+  iconOnly?: boolean
+  onDeleteCustomer: (customer: MemberApplication) => void
+}) {
+  return (
+    <button
+      aria-label={`ลบข้อมูลของ ${getApplicationFullName(customer)}`}
+      className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#d8b8a7] bg-white text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] ${
+        iconOnly ? 'w-10 px-0' : 'px-3'
+      }`}
+      onClick={() => onDeleteCustomer(customer)}
+      title="ลบข้อมูล"
+      type="button"
+    >
+      <Trash2 size={17} />
+      {iconOnly ? null : 'ลบข้อมูล'}
+    </button>
   )
 }
