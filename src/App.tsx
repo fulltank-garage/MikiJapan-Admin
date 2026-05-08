@@ -7,6 +7,9 @@ import type { AuthSession } from './services/api'
 
 type AdminPage = 'dashboard' | 'customers' | 'messages'
 
+const activePageStorageKey = 'admin_active_page'
+const adminPages: AdminPage[] = ['dashboard', 'customers', 'messages']
+
 const getStoredSession = () => {
   const stored = localStorage.getItem('admin_session')
 
@@ -23,11 +26,25 @@ const getStoredSession = () => {
   }
 }
 
+const getStoredActivePage = (): AdminPage => {
+  const stored = localStorage.getItem(activePageStorageKey)
+  return adminPages.includes(stored as AdminPage)
+    ? (stored as AdminPage)
+    : 'dashboard'
+}
+
 function App() {
   const [session, setSession] = useState<AuthSession | null>(() =>
     getStoredSession(),
   )
-  const [activePage, setActivePage] = useState<AdminPage>('dashboard')
+  const [activePage, setActivePage] = useState<AdminPage>(() =>
+    getStoredActivePage(),
+  )
+
+  const openPage = (page: AdminPage) => {
+    localStorage.setItem(activePageStorageKey, page)
+    setActivePage(page)
+  }
 
   const handleLogin = (nextSession: AuthSession) => {
     localStorage.setItem('admin_token', nextSession.token)
@@ -38,6 +55,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('admin_token')
     localStorage.removeItem('admin_session')
+    localStorage.removeItem(activePageStorageKey)
     setSession(null)
     setActivePage('dashboard')
   }
@@ -51,24 +69,24 @@ function App() {
       <div className={activePage === 'customers' ? 'block' : 'hidden'}>
       <CustomerPage
         onLogout={handleLogout}
-        onOpenDashboard={() => setActivePage('dashboard')}
-        onOpenMessages={() => setActivePage('messages')}
+        onOpenDashboard={() => openPage('dashboard')}
+        onOpenMessages={() => openPage('messages')}
         session={session}
       />
       </div>
       <div className={activePage === 'messages' ? 'block' : 'hidden'}>
       <MessagesPage
-        onBackToDashboard={() => setActivePage('dashboard')}
+        onBackToDashboard={() => openPage('dashboard')}
         onLogout={handleLogout}
-        onOpenCustomers={() => setActivePage('customers')}
+        onOpenCustomers={() => openPage('customers')}
         session={session}
       />
       </div>
       <div className={activePage === 'dashboard' ? 'block' : 'hidden'}>
         <CustomerDashboardPage
           onLogout={handleLogout}
-          onOpenMessages={() => setActivePage('messages')}
-          onOpenCustomers={() => setActivePage('customers')}
+          onOpenMessages={() => openPage('messages')}
+          onOpenCustomers={() => openPage('customers')}
           session={session}
         />
       </div>
