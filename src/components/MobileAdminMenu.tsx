@@ -22,17 +22,17 @@ type MobileAdminMenuProps = {
 const navItems = [
   {
     key: 'dashboard',
-    label: 'Dashboard',
+    label: 'แดชบอร์ด',
     icon: LayoutDashboard,
   },
   {
     key: 'customers',
-    label: 'Customers',
+    label: 'ข้อมูลลูกค้า',
     icon: UsersRound,
   },
   {
     key: 'messages',
-    label: 'Messages',
+    label: 'ข้อมูลการสมัคร',
     icon: Mail,
   },
 ] satisfies Array<{

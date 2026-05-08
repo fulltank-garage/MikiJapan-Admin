@@ -212,11 +212,11 @@ export function CustomerPage({
             type="button"
           >
             <LayoutDashboard size={18} />
-            Dashboard
+            แดชบอร์ด
           </button>
           <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
             <UsersRound size={18} />
-            Customers
+            ข้อมูลลูกค้า
           </button>
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
@@ -224,7 +224,7 @@ export function CustomerPage({
             type="button"
           >
             <Mail size={18} />
-            Messages
+            ข้อมูลการสมัคร
           </button>
         </nav>
 
@@ -260,7 +260,7 @@ export function CustomerPage({
               </button>
               <div>
                 <p className="text-sm font-medium text-[#8f6847]">
-                  Approved Members
+                  ลูกค้าที่ผ่านการยืนยัน
                 </p>
                 <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
                   จัดการข้อมูลลูกค้า
@@ -291,7 +291,7 @@ export function CustomerPage({
             <div className="flex flex-col gap-4 border-b border-[#ead8c7] p-4 sm:p-5 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-950">
-                  Member List
+                  รายชื่อลูกค้า
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                   แสดงเฉพาะลูกค้าที่ผ่านการยืนยันการสมัครแล้ว

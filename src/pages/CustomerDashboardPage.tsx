@@ -146,7 +146,7 @@ export function CustomerDashboardPage({
         <nav className="space-y-2">
           <button className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white">
             <LayoutDashboard size={18} />
-            Dashboard
+            แดชบอร์ด
           </button>
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
@@ -154,7 +154,7 @@ export function CustomerDashboardPage({
             type="button"
           >
             <UsersRound size={18} />
-            Customers
+            ข้อมูลลูกค้า
           </button>
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
@@ -162,7 +162,7 @@ export function CustomerDashboardPage({
             type="button"
           >
             <Mail size={18} />
-            Messages
+            ข้อมูลการสมัคร
           </button>
         </nav>
 
@@ -198,7 +198,7 @@ export function CustomerDashboardPage({
               </button>
               <div>
                 <p className="text-sm font-medium text-[#8f6847]">
-                  Customer Management
+                  ภาพรวมลูกค้า
                 </p>
                 <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
                   แดชบอร์ดจัดการลูกค้า

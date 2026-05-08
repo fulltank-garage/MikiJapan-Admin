@@ -199,6 +199,14 @@ export function MessagesPage({
     )
   }, [customerApplications, query])
 
+  const pendingApplicationCount = useMemo(
+    () =>
+      customerApplications.filter(
+        (application) => application.status === 'pending',
+      ).length,
+    [customerApplications],
+  )
+
   const selectedApplication =
     filteredApplications.find(
       (application) => application.id === selectedApplicationId,
@@ -273,7 +281,7 @@ export function MessagesPage({
             type="button"
           >
             <LayoutDashboard size={18} />
-            Dashboard
+            แดชบอร์ด
           </button>
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-[#f5dfc8] transition hover:bg-white/10 hover:text-white"
@@ -281,14 +289,19 @@ export function MessagesPage({
             type="button"
           >
             <UsersRound size={18} />
-            Customers
+            ข้อมูลลูกค้า
           </button>
           <button
             className="flex h-11 w-full items-center gap-3 rounded-lg bg-[#f7eadc]/18 px-3 text-left text-sm font-medium text-white"
             type="button"
           >
             <Mail size={18} />
-            Messages
+            <span className="min-w-0 flex-1">ข้อมูลการสมัคร</span>
+            {pendingApplicationCount > 0 ? (
+              <span className="grid min-w-6 place-items-center rounded-full bg-white px-2 py-0.5 text-xs font-bold leading-5 text-[#6f5238]">
+                {pendingApplicationCount}
+              </span>
+            ) : null}
           </button>
         </nav>
 
@@ -324,7 +337,7 @@ export function MessagesPage({
               </button>
               <div>
                 <p className="text-sm font-medium text-[#8f6847]">
-                  Customer Applications
+                  ข้อมูลการสมัคร
                 </p>
                 <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
                   ข้อมูลการสมัครของลูกค้า
