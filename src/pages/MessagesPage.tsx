@@ -14,17 +14,18 @@ import {
   UsersRound,
   XCircle,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import {
   applicationApi,
-  createApplicationEventsSocket,
   isApiConfigured,
+  subscribeApplicationEvents,
   type ApplicationStatus,
   type AuthSession,
   type MemberApplicationEvent,
   type MemberApplication,
+  type RealtimeStatus,
 } from '../services/api'
 
 type MessagesPageProps = {
@@ -91,56 +92,41 @@ export function MessagesPage({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
   const [notice, setNotice] = useState('')
+  const [realtimeStatus, setRealtimeStatus] =
+    useState<RealtimeStatus>('connecting')
 
-  useEffect(() => {
-    let isMounted = true
-
-    const loadApplications = async () => {
-      setIsLoadingApplications(true)
-      setNotice('')
-
-      try {
-        const data = isApiConfigured ? await applicationApi.list() : []
-
-        if (isMounted) {
-          const pendingApplications = data.filter(
-            (application) => application.status === 'pending',
-          )
-          setCustomerApplications(data)
-          setSelectedApplicationId((current) =>
-            pendingApplications.some((application) => application.id === current)
-              ? current
-              : pendingApplications[0]?.id || '',
-          )
-        }
-      } catch {
-        if (isMounted) {
-          setNotice('โหลดข้อมูลการสมัครจาก API ไม่สำเร็จ')
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingApplications(false)
-        }
-      }
-    }
-
-    loadApplications()
-
-    return () => {
-      isMounted = false
+  const loadApplications = useCallback(async () => {
+    try {
+      const data = isApiConfigured ? await applicationApi.list() : []
+      const pendingApplications = data.filter(
+        (application) => application.status === 'pending',
+      )
+      setCustomerApplications(data)
+      setSelectedApplicationId((current) =>
+        pendingApplications.some((application) => application.id === current)
+          ? current
+          : pendingApplications[0]?.id || '',
+      )
+    } catch {
+      setNotice('โหลดข้อมูลการสมัครจาก API ไม่สำเร็จ')
+    } finally {
+      setIsLoadingApplications(false)
     }
   }, [])
 
   useEffect(() => {
-    const socket = createApplicationEventsSocket()
-    if (!socket) {
-      return
-    }
+    const initialLoadTimer = window.setTimeout(() => {
+      void loadApplications()
+    }, 0)
 
-    socket.onmessage = (message) => {
+    return () => window.clearTimeout(initialLoadTimer)
+  }, [loadApplications])
+
+  useEffect(() => {
+    return subscribeApplicationEvents({
+      onStatus: setRealtimeStatus,
+      onEvent: (event: MemberApplicationEvent) => {
       try {
-        const event = JSON.parse(message.data) as MemberApplicationEvent
-
         if (event.type === 'member_application.created') {
           setCustomerApplications((current) =>
             upsertApplication(current, event.data),
@@ -172,16 +158,21 @@ export function MessagesPage({
       } catch {
         setNotice('รับข้อมูล realtime ไม่สำเร็จ')
       }
-    }
-
-    socket.onerror = () => {
-      setNotice('เชื่อมต่อ realtime ไม่สำเร็จ')
-    }
-
-    return () => {
-      socket.close()
-    }
+      },
+    })
   }, [])
+
+  useEffect(() => {
+    if (realtimeStatus === 'connected') {
+      return
+    }
+
+    const fallbackTimer = window.setInterval(() => {
+      loadApplications()
+    }, 10000)
+
+    return () => window.clearInterval(fallbackTimer)
+  }, [loadApplications, realtimeStatus])
 
   const filteredApplications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -334,6 +325,7 @@ export function MessagesPage({
             </div>
 
             <div className="flex items-center gap-2">
+              <RealtimeStatusBadge status={realtimeStatus} />
               <button
                 className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#ead8c7] bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-[#fff8f1]"
                 onClick={onBackToDashboard}
@@ -579,6 +571,27 @@ function ApplicationStatusBadge({ status }: { status: ApplicationStatus }) {
     >
       <Icon size={13} />
       {meta.label}
+    </span>
+  )
+}
+
+function RealtimeStatusBadge({ status }: { status: RealtimeStatus }) {
+  const isConnected = status === 'connected'
+
+  return (
+    <span
+      className={`hidden h-10 items-center gap-2 rounded-lg border px-3 text-xs font-semibold sm:inline-flex ${
+        isConnected
+          ? 'border-[#d8c1a8] bg-[#fbf1e7] text-[#8f6847]'
+          : 'border-[#d8b8a7] bg-[#f8eee8] text-[#9a5f45]'
+      }`}
+    >
+      <span
+        className={`size-2 rounded-full ${
+          isConnected ? 'bg-[#8f6847]' : 'bg-[#9a5f45]'
+        }`}
+      />
+      {isConnected ? 'Realtime' : 'Syncing'}
     </span>
   )
 }

@@ -40,6 +40,8 @@ export type MemberApplicationEvent = {
   data: MemberApplication
 }
 
+export type RealtimeStatus = 'connecting' | 'connected' | 'reconnecting' | 'off'
+
 export type LoginPayload = {
   email: string
   password: string
@@ -136,7 +138,7 @@ export const applicationApi = {
   },
 }
 
-export const createApplicationEventsSocket = () => {
+const createApplicationEventsSocket = () => {
   if (!isApiConfigured) {
     return null
   }
@@ -153,4 +155,71 @@ export const createApplicationEventsSocket = () => {
   baseUrl.searchParams.set('token', token)
 
   return new WebSocket(baseUrl.toString())
+}
+
+export const subscribeApplicationEvents = ({
+  onEvent,
+  onStatus,
+}: {
+  onEvent: (event: MemberApplicationEvent) => void
+  onStatus?: (status: RealtimeStatus) => void
+}) => {
+  let socket: WebSocket | null = null
+  let retryTimer: ReturnType<typeof setTimeout> | null = null
+  let retryCount = 0
+  let isClosed = false
+
+  const clearRetry = () => {
+    if (retryTimer) {
+      clearTimeout(retryTimer)
+      retryTimer = null
+    }
+  }
+
+  const connect = () => {
+    if (isClosed) {
+      return
+    }
+
+    socket = createApplicationEventsSocket()
+    if (!socket) {
+      onStatus?.('off')
+      return
+    }
+
+    onStatus?.(retryCount === 0 ? 'connecting' : 'reconnecting')
+
+    socket.onopen = () => {
+      retryCount = 0
+      onStatus?.('connected')
+    }
+
+    socket.onmessage = (message) => {
+      onEvent(JSON.parse(message.data) as MemberApplicationEvent)
+    }
+
+    socket.onerror = () => {
+      socket?.close()
+    }
+
+    socket.onclose = () => {
+      if (isClosed) {
+        return
+      }
+
+      retryCount += 1
+      onStatus?.('reconnecting')
+      const retryDelay = Math.min(1000 * retryCount, 10000)
+      retryTimer = setTimeout(connect, retryDelay)
+    }
+  }
+
+  connect()
+
+  return () => {
+    isClosed = true
+    clearRetry()
+    onStatus?.('off')
+    socket?.close()
+  }
 }

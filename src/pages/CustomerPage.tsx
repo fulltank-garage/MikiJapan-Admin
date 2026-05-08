@@ -12,16 +12,17 @@ import {
   UserRound,
   UsersRound,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import {
   applicationApi,
-  createApplicationEventsSocket,
   isApiConfigured,
+  subscribeApplicationEvents,
   type AuthSession,
   type MemberApplicationEvent,
   type MemberApplication,
+  type RealtimeStatus,
 } from '../services/api'
 import { numberFormatter } from '../utils/formatters'
 
@@ -66,51 +67,36 @@ export function CustomerPage({
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [realtimeStatus, setRealtimeStatus] =
+    useState<RealtimeStatus>('connecting')
 
-  useEffect(() => {
-    let isMounted = true
-
-    const loadCustomers = async () => {
-      setIsLoadingCustomers(true)
-      setNotice('')
-
-      try {
-        const data = isApiConfigured ? await applicationApi.list() : []
-        const approvedCustomers = data.filter(
-          (application) => application.status === 'approved',
-        )
-
-        if (isMounted) {
-          setCustomers(approvedCustomers)
-        }
-      } catch {
-        if (isMounted) {
-          setNotice('โหลดข้อมูลลูกค้าจาก API ไม่สำเร็จ')
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingCustomers(false)
-        }
-      }
-    }
-
-    loadCustomers()
-
-    return () => {
-      isMounted = false
+  const loadCustomers = useCallback(async () => {
+    try {
+      const data = isApiConfigured ? await applicationApi.list() : []
+      const approvedCustomers = data.filter(
+        (application) => application.status === 'approved',
+      )
+      setCustomers(approvedCustomers)
+    } catch {
+      setNotice('โหลดข้อมูลลูกค้าจาก API ไม่สำเร็จ')
+    } finally {
+      setIsLoadingCustomers(false)
     }
   }, [])
 
   useEffect(() => {
-    const socket = createApplicationEventsSocket()
-    if (!socket) {
-      return
-    }
+    const initialLoadTimer = window.setTimeout(() => {
+      void loadCustomers()
+    }, 0)
 
-    socket.onmessage = (message) => {
+    return () => window.clearTimeout(initialLoadTimer)
+  }, [loadCustomers])
+
+  useEffect(() => {
+    return subscribeApplicationEvents({
+      onStatus: setRealtimeStatus,
+      onEvent: (event: MemberApplicationEvent) => {
       try {
-        const event = JSON.parse(message.data) as MemberApplicationEvent
-
         if (
           event.type === 'member_application.updated' &&
           event.data.status === 'approved'
@@ -130,16 +116,21 @@ export function CustomerPage({
       } catch {
         setNotice('รับข้อมูล realtime ไม่สำเร็จ')
       }
-    }
-
-    socket.onerror = () => {
-      setNotice('เชื่อมต่อ realtime ไม่สำเร็จ')
-    }
-
-    return () => {
-      socket.close()
-    }
+      },
+    })
   }, [])
+
+  useEffect(() => {
+    if (realtimeStatus === 'connected') {
+      return
+    }
+
+    const fallbackTimer = window.setInterval(() => {
+      loadCustomers()
+    }, 10000)
+
+    return () => window.clearInterval(fallbackTimer)
+  }, [loadCustomers, realtimeStatus])
 
   const filteredCustomers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -269,14 +260,17 @@ export function CustomerPage({
               </div>
             </div>
 
-            <button
-              className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
-              onClick={onLogout}
-              title="ออกจากระบบ"
-              type="button"
-            >
-              <LogOut size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              <RealtimeStatusBadge status={realtimeStatus} />
+              <button
+                className="grid size-10 place-items-center rounded-lg border border-[#ead8c7] bg-white text-slate-700 transition hover:bg-[#fff8f1]"
+                onClick={onLogout}
+                title="ออกจากระบบ"
+                type="button"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -476,5 +470,26 @@ function CustomerLinkDetail({
         <ExternalLink className="shrink-0" size={14} />
       </a>
     </div>
+  )
+}
+
+function RealtimeStatusBadge({ status }: { status: RealtimeStatus }) {
+  const isConnected = status === 'connected'
+
+  return (
+    <span
+      className={`hidden h-10 items-center gap-2 rounded-lg border px-3 text-xs font-semibold sm:inline-flex ${
+        isConnected
+          ? 'border-[#d8c1a8] bg-[#fbf1e7] text-[#8f6847]'
+          : 'border-[#d8b8a7] bg-[#f8eee8] text-[#9a5f45]'
+      }`}
+    >
+      <span
+        className={`size-2 rounded-full ${
+          isConnected ? 'bg-[#8f6847]' : 'bg-[#9a5f45]'
+        }`}
+      />
+      {isConnected ? 'Realtime' : 'Syncing'}
+    </span>
   )
 }
