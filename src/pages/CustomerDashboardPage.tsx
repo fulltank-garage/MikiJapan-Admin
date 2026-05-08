@@ -37,7 +37,9 @@ export function CustomerDashboardPage({
   onOpenMessages,
   session,
 }: CustomerDashboardPageProps) {
-  const [customers, setCustomers] = useState<Customer[]>(customerSeed)
+  const [customers, setCustomers] = useState<Customer[]>(
+    isApiConfigured ? [] : customerSeed,
+  )
   const [query, setQuery] = useState('')
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

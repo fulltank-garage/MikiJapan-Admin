@@ -46,35 +46,33 @@ function App() {
     return <LoginPage onLogin={handleLogin} />
   }
 
-  if (activePage === 'customers') {
-    return (
+  return (
+    <>
+      <div className={activePage === 'customers' ? 'block' : 'hidden'}>
       <CustomerPage
         onLogout={handleLogout}
         onOpenDashboard={() => setActivePage('dashboard')}
         onOpenMessages={() => setActivePage('messages')}
         session={session}
       />
-    )
-  }
-
-  if (activePage === 'messages') {
-    return (
+      </div>
+      <div className={activePage === 'messages' ? 'block' : 'hidden'}>
       <MessagesPage
         onBackToDashboard={() => setActivePage('dashboard')}
         onLogout={handleLogout}
         onOpenCustomers={() => setActivePage('customers')}
         session={session}
       />
-    )
-  }
-
-  return (
-    <CustomerDashboardPage
-      onLogout={handleLogout}
-      onOpenMessages={() => setActivePage('messages')}
-      onOpenCustomers={() => setActivePage('customers')}
-      session={session}
-    />
+      </div>
+      <div className={activePage === 'dashboard' ? 'block' : 'hidden'}>
+        <CustomerDashboardPage
+          onLogout={handleLogout}
+          onOpenMessages={() => setActivePage('messages')}
+          onOpenCustomers={() => setActivePage('customers')}
+          session={session}
+        />
+      </div>
+    </>
   )
 }
 
