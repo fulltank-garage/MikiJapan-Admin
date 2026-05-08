@@ -156,7 +156,6 @@ export function CustomerDashboardPage({
     return [
       {
         label: 'สมาชิกทั้งหมด',
-        shortLabel: 'สมาชิก',
         value: numberFormatter.format(customers.length),
         helper: 'ผ่านการยืนยันแล้ว',
         icon: UsersRound,
@@ -164,7 +163,6 @@ export function CustomerDashboardPage({
       },
       {
         label: 'มีรูปหน้าร้าน',
-        shortLabel: 'รูป',
         value: numberFormatter.format(storefrontImageCount),
         helper: 'แนบรูปประกอบข้อมูล',
         icon: UserRound,
@@ -172,7 +170,6 @@ export function CustomerDashboardPage({
       },
       {
         label: 'รอตรวจสอบ',
-        shortLabel: 'รอ',
         value: numberFormatter.format(pendingApplicationCount),
         helper: 'ใบสมัครใหม่',
         icon: Mail,
@@ -288,9 +285,8 @@ export function CustomerDashboardPage({
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-[11px] font-medium leading-5 text-slate-500 sm:text-xs lg:text-sm">
-                        <span className="lg:hidden">{item.shortLabel}</span>
-                        <span className="hidden lg:inline">{item.label}</span>
+                      <p className="text-[11px] font-medium leading-snug text-slate-500 sm:text-xs lg:text-sm">
+                        {item.label}
                       </p>
                       <p className="mt-1 text-xl font-semibold leading-7 text-slate-950 sm:mt-2 sm:text-2xl">
                         {item.value}

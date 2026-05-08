@@ -300,17 +300,14 @@ export function CustomerPage({
           <section className="grid grid-cols-3 gap-2 sm:gap-4">
             <SummaryCard
               label="ลูกค้าที่เป็น Member"
-              shortLabel="Member"
               value={numberFormatter.format(customers.length)}
             />
             <SummaryCard
               label="มีรูปหน้าร้าน"
-              shortLabel="รูป"
               value={numberFormatter.format(storefrontImageCount)}
             />
             <SummaryCard
               label="รายการที่แสดง"
-              shortLabel="แสดง"
               value={numberFormatter.format(filteredCustomers.length)}
             />
           </section>
@@ -354,18 +351,15 @@ export function CustomerPage({
 
 function SummaryCard({
   label,
-  shortLabel,
   value,
 }: {
   label: string
-  shortLabel: string
   value: string
 }) {
   return (
     <article className="min-w-0 rounded-lg border border-[#ead8c7] bg-white px-3 py-2.5 shadow-sm sm:p-4 lg:p-5">
-      <p className="truncate text-[11px] font-medium leading-5 text-slate-500 sm:text-xs lg:text-sm">
-        <span className="lg:hidden">{shortLabel}</span>
-        <span className="hidden lg:inline">{label}</span>
+      <p className="text-[11px] font-medium leading-snug text-slate-500 sm:text-xs lg:text-sm">
+        {label}
       </p>
       <p className="mt-1 text-xl font-semibold leading-7 text-slate-950 sm:mt-2 sm:text-2xl">
         {value}
