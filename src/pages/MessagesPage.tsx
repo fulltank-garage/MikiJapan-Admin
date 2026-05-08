@@ -33,6 +33,7 @@ type MessagesPageProps = {
   onBackToDashboard: () => void
   onLogout: () => void
   onOpenCustomers: () => void
+  pendingApplicationCount: number
   session: AuthSession
 }
 
@@ -84,6 +85,7 @@ export function MessagesPage({
   onBackToDashboard,
   onLogout,
   onOpenCustomers,
+  pendingApplicationCount,
   session,
 }: MessagesPageProps) {
   const [customerApplications, setCustomerApplications] =
@@ -199,14 +201,6 @@ export function MessagesPage({
         .includes(normalizedQuery),
     )
   }, [customerApplications, query])
-
-  const pendingApplicationCount = useMemo(
-    () =>
-      customerApplications.filter(
-        (application) => application.status === 'pending',
-      ).length,
-    [customerApplications],
-  )
 
   const selectedApplication =
     filteredApplications.find(

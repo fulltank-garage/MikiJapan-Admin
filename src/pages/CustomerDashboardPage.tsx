@@ -5,12 +5,11 @@ import {
   Menu,
   UsersRound,
 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import { Snackbar } from '../components/Snackbar'
 import {
-  applicationApi,
   isApiConfigured,
   memberApi,
   subscribeApplicationEvents,
@@ -24,6 +23,7 @@ type CustomerDashboardPageProps = {
   onLogout: () => void
   onOpenCustomers: () => void
   onOpenMessages: () => void
+  pendingApplicationCount: number
   session: AuthSession
 }
 
@@ -48,24 +48,13 @@ export function CustomerDashboardPage({
   onLogout,
   onOpenCustomers,
   onOpenMessages,
+  pendingApplicationCount,
   session,
 }: CustomerDashboardPageProps) {
   const [customers, setCustomers] = useState<MemberApplication[]>([])
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(isApiConfigured)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
-  const [pendingApplicationCount, setPendingApplicationCount] = useState(0)
-
-  const loadPendingApplicationCount = useCallback(async () => {
-    try {
-      const data = isApiConfigured ? await applicationApi.list() : []
-      setPendingApplicationCount(
-        data.filter((application) => application.status === 'pending').length,
-      )
-    } catch {
-      setNotice('โหลดจำนวนข้อมูลการสมัครไม่สำเร็จ')
-    }
-  }, [])
 
   useEffect(() => {
     if (!isApiConfigured) {
@@ -100,14 +89,6 @@ export function CustomerDashboardPage({
   }, [])
 
   useEffect(() => {
-    const initialLoadTimer = window.setTimeout(() => {
-      void loadPendingApplicationCount()
-    }, 0)
-
-    return () => window.clearTimeout(initialLoadTimer)
-  }, [loadPendingApplicationCount])
-
-  useEffect(() => {
     return subscribeApplicationEvents({
       onEvent: (event: MemberApplicationEvent) => {
         try {
@@ -116,28 +97,12 @@ export function CustomerDashboardPage({
             event.data.status === 'approved'
           ) {
             setCustomers((current) => upsertCustomer(current, event.data))
-            setPendingApplicationCount((current) => Math.max(current - 1, 0))
-            return
-          }
-
-          if (event.type === 'member_application.created') {
-            setPendingApplicationCount((current) => current + 1)
-            return
-          }
-
-          if (event.type === 'member_application.updated') {
-            setPendingApplicationCount((current) => Math.max(current - 1, 0))
             return
           }
 
           if (event.type === 'member_application.deleted') {
             setCustomers((current) =>
               current.filter((customer) => customer.id !== event.data.id),
-            )
-            setPendingApplicationCount((current) =>
-              event.data.status === 'pending' || event.data.status === 'rejected'
-                ? Math.max(current - 1, 0)
-                : current,
             )
           }
         } catch {

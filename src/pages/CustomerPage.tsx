@@ -14,7 +14,6 @@ import { BrandLogo } from '../components/BrandLogo'
 import { MobileAdminMenu } from '../components/MobileAdminMenu'
 import { Snackbar } from '../components/Snackbar'
 import {
-  applicationApi,
   isApiConfigured,
   memberApi,
   subscribeApplicationEvents,
@@ -28,6 +27,7 @@ type CustomerPageProps = {
   onLogout: () => void
   onOpenDashboard: () => void
   onOpenMessages: () => void
+  pendingApplicationCount: number
   session: AuthSession
 }
 
@@ -58,6 +58,7 @@ export function CustomerPage({
   onLogout,
   onOpenDashboard,
   onOpenMessages,
+  pendingApplicationCount,
   session,
 }: CustomerPageProps) {
   const [customers, setCustomers] = useState<MemberApplication[]>([])
@@ -65,19 +66,13 @@ export function CustomerPage({
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
-  const [pendingApplicationCount, setPendingApplicationCount] = useState(0)
   const [realtimeStatus, setRealtimeStatus] =
     useState<RealtimeStatus>('connecting')
 
   const loadCustomers = useCallback(async () => {
     try {
       const data = isApiConfigured ? await memberApi.list() : []
-      const applications = isApiConfigured ? await applicationApi.list() : []
       setCustomers(data)
-      setPendingApplicationCount(
-        applications.filter((application) => application.status === 'pending')
-          .length,
-      )
     } catch {
       setNotice('โหลดข้อมูลลูกค้าจาก API ไม่สำเร็จ')
     } finally {
@@ -98,28 +93,17 @@ export function CustomerPage({
       onStatus: setRealtimeStatus,
       onEvent: (event: MemberApplicationEvent) => {
         try {
-          if (event.type === 'member_application.created') {
-            setPendingApplicationCount((current) => current + 1)
-            return
-          }
-
           if (
             event.type === 'member_application.updated' &&
             event.data.status === 'approved'
           ) {
             setCustomers((current) => upsertCustomer(current, event.data))
-            setPendingApplicationCount((current) => Math.max(current - 1, 0))
             return
           }
 
           if (event.type === 'member_application.deleted') {
             setCustomers((current) =>
               current.filter((customer) => customer.id !== event.data.id),
-            )
-            setPendingApplicationCount((current) =>
-              event.data.status === 'pending' || event.data.status === 'rejected'
-                ? Math.max(current - 1, 0)
-                : current,
             )
             return
           }
