@@ -73,9 +73,11 @@ export const getCurrentPushSubscription = async () => {
 }
 
 export const sendTestPushNotification = async () => {
-  const subscription = await getCurrentPushSubscription()
+  let subscription = await getCurrentPushSubscription()
   if (!subscription) {
-    throw new Error('ยังไม่ได้เปิดการแจ้งเตือนบนเครื่องนี้')
+    subscription = await enablePushNotifications()
+  } else {
+    await pushNotificationApi.subscribe(subscription)
   }
 
   await pushNotificationApi.test(subscription)

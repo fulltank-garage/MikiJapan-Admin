@@ -60,6 +60,21 @@ export type PushPublicKeyResponse = {
   publicKey: string
 }
 
+type ApiErrorData = {
+  message?: string
+}
+
+export const getApiErrorMessage = (
+  error: unknown,
+  fallback = 'ทำรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+) => {
+  if (axios.isAxiosError<ApiErrorData>(error)) {
+    return error.response?.data?.message || fallback
+  }
+
+  return error instanceof Error ? error.message : fallback
+}
+
 const defaultApiBaseUrl =
   'https://mikijapan-api-production-7e32.up.railway.app/api'
 const apiBaseUrl =
@@ -161,14 +176,26 @@ export const applicationApi = {
 
 export const pushNotificationApi = {
   async getPublicKey() {
-    const { data } = await api.get<PushPublicKeyResponse>(
-      '/push-notifications/public-key',
-    )
-    return data
+    try {
+      const { data } = await api.get<PushPublicKeyResponse>(
+        '/push-notifications/public-key',
+      )
+      return data
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'โหลดข้อมูลแจ้งเตือนไม่สำเร็จ'), {
+        cause: error,
+      })
+    }
   },
 
   async subscribe(subscription: PushSubscription) {
-    await api.post('/push-notifications/subscriptions', subscription.toJSON())
+    try {
+      await api.post('/push-notifications/subscriptions', subscription.toJSON())
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'บันทึกการแจ้งเตือนไม่สำเร็จ'), {
+        cause: error,
+      })
+    }
   },
 
   async unsubscribe(subscription: PushSubscription) {
@@ -180,9 +207,15 @@ export const pushNotificationApi = {
   },
 
   async test(subscription: PushSubscription) {
-    await api.post('/push-notifications/test', {
-      endpoint: subscription.endpoint,
-    })
+    try {
+      await api.post('/push-notifications/test', {
+        endpoint: subscription.endpoint,
+      })
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'ทดสอบแจ้งเตือนไม่สำเร็จ'), {
+        cause: error,
+      })
+    }
   },
 }
 
