@@ -206,17 +206,6 @@ export const pushNotificationApi = {
     })
   },
 
-  async test(subscription: PushSubscription) {
-    try {
-      await api.post('/push-notifications/test', {
-        endpoint: subscription.endpoint,
-      })
-    } catch (error) {
-      throw new Error(getApiErrorMessage(error, 'ทดสอบแจ้งเตือนไม่สำเร็จ'), {
-        cause: error,
-      })
-    }
-  },
 }
 
 const createApplicationEventsSocket = () => {

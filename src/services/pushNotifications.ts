@@ -1,7 +1,6 @@
 import { pushNotificationApi } from './api'
 
 const serviceWorkerPath = '/admin-sw.js'
-const staleSubscriptionMessage = 'ส่ง push notification ไม่สำเร็จ'
 
 const urlBase64ToUint8Array = (base64String: string) => {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -38,9 +37,6 @@ const registerPushServiceWorker = async () => {
 
   return navigator.serviceWorker.ready
 }
-
-const shouldRefreshSubscription = (error: unknown) =>
-  error instanceof Error && error.message.includes(staleSubscriptionMessage)
 
 export const enablePushNotifications = async () => {
   if (!isPushNotificationSupported()) {
@@ -82,37 +78,4 @@ export const getCurrentPushSubscription = async () => {
   const registration = await registerPushServiceWorker()
 
   return registration.pushManager.getSubscription()
-}
-
-const refreshPushSubscription = async () => {
-  const registration = await registerPushServiceWorker()
-  const existingSubscription = await registration.pushManager.getSubscription()
-  if (existingSubscription) {
-    await pushNotificationApi
-      .unsubscribe(existingSubscription)
-      .catch(() => undefined)
-    await existingSubscription.unsubscribe()
-  }
-
-  return enablePushNotifications()
-}
-
-export const sendTestPushNotification = async () => {
-  let subscription = await getCurrentPushSubscription()
-  if (!subscription) {
-    subscription = await enablePushNotifications()
-  } else {
-    await pushNotificationApi.subscribe(subscription)
-  }
-
-  try {
-    await pushNotificationApi.test(subscription)
-  } catch (error) {
-    if (!shouldRefreshSubscription(error)) {
-      throw error
-    }
-
-    const refreshedSubscription = await refreshPushSubscription()
-    await pushNotificationApi.test(refreshedSubscription)
-  }
 }

@@ -1,7 +1,7 @@
 {
-  "name": "Miki Japan Admin",
+  "name": "Miki Japan",
   "short_name": "Miki Japan",
-  "description": "Miki Japan admin web app",
+  "description": "Miki Japan",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -2,7 +2,6 @@ import { BellRing } from 'lucide-react'
 import { useState } from 'react'
 import {
   enablePushNotifications,
-  sendTestPushNotification,
   getCurrentPushPermission,
   isPushNotificationSupported,
 } from '../services/pushNotifications'
@@ -16,7 +15,6 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
     typeof window === 'undefined' ? 'unsupported' : getCurrentPushPermission(),
   )
   const [isEnabling, setIsEnabling] = useState(false)
-  const [isTesting, setIsTesting] = useState(false)
 
   if (!isPushNotificationSupported()) {
     return null
@@ -32,18 +30,6 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
       onNotice(error instanceof Error ? error.message : 'เปิดการแจ้งเตือนไม่สำเร็จ')
     } finally {
       setIsEnabling(false)
-    }
-  }
-
-  const handleTest = async () => {
-    try {
-      setIsTesting(true)
-      await sendTestPushNotification()
-      onNotice('ส่งแจ้งเตือนทดสอบแล้ว')
-    } catch (error) {
-      onNotice(error instanceof Error ? error.message : 'ทดสอบแจ้งเตือนไม่สำเร็จ')
-    } finally {
-      setIsTesting(false)
     }
   }
 
@@ -63,7 +49,7 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-500">
               {isGranted
-                ? 'เปิดแล้ว สามารถกดทดสอบเพื่อเช็คว่าเครื่องนี้รับแจ้งเตือนได้'
+                ? 'เปิดแล้ว ระบบจะแจ้งเตือนเมื่อมีผู้สมัครใหม่'
                 : isDenied
                   ? 'Browser ปิดสิทธิ์แจ้งเตือน ต้องเปิด permission จากการตั้งค่า Browser ก่อน'
                   : 'เปิดไว้เพื่อให้ระบบแจ้งเตือนแม้ไม่ได้อยู่หน้าเว็บ Admin'}
@@ -83,16 +69,6 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
                       ? 'กำลังเปิด...'
                       : 'เปิดการแจ้งเตือน'}
               </button>
-              {isGranted ? (
-                <button
-                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-[#dbc6b2] bg-white px-4 text-sm font-semibold text-[#6f5238] transition hover:bg-[#fbf1e7] disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={isTesting}
-                  onClick={handleTest}
-                  type="button"
-                >
-                  {isTesting ? 'กำลังทดสอบ...' : 'ทดสอบแจ้งเตือน'}
-                </button>
-              ) : null}
             </div>
           </div>
         </div>
