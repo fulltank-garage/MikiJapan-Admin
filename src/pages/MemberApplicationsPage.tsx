@@ -549,7 +549,7 @@ export function MemberApplicationsPage({
                           aria-expanded={
                             expandedApplicationId === application.id
                           }
-                          className={`block w-full min-w-0 px-4 py-3 text-left transition hover:bg-[#fff8f1] sm:px-5 ${
+                          className={`block w-full min-w-0 px-4 py-3 text-left transition-colors duration-200 hover:bg-[#fff8f1] sm:px-5 ${
                             selectedApplication?.id === application.id
                               ? 'bg-[#fbf1e7]/80 shadow-[inset_4px_0_0_#9a7655]'
                               : ''
@@ -573,14 +573,22 @@ export function MemberApplicationsPage({
 
                         <div
                           aria-hidden={expandedApplicationId !== application.id}
-                          className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out lg:hidden ${
+                          className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden ${
                             expandedApplicationId === application.id
-                              ? 'max-h-[120rem] opacity-100'
-                              : 'invisible max-h-0 opacity-0'
+                              ? 'grid-rows-[1fr] opacity-100'
+                              : 'pointer-events-none grid-rows-[0fr] opacity-0'
                           }`}
                         >
-                          <div className="px-4 pb-5 pt-3 sm:px-5">
-                            {renderApplicationDetail(application, 'inline')}
+                          <div className="min-h-0 overflow-hidden">
+                            <div
+                              className={`px-4 pb-5 pt-3 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-5 ${
+                                expandedApplicationId === application.id
+                                  ? 'translate-y-0'
+                                  : '-translate-y-2'
+                              }`}
+                            >
+                              {renderApplicationDetail(application, 'inline')}
+                            </div>
                           </div>
                         </div>
                       </div>
