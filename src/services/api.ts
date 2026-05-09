@@ -178,6 +178,12 @@ export const pushNotificationApi = {
       },
     })
   },
+
+  async test(subscription: PushSubscription) {
+    await api.post('/push-notifications/test', {
+      endpoint: subscription.endpoint,
+    })
+  },
 }
 
 const createApplicationEventsSocket = () => {

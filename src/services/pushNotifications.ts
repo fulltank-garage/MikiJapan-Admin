@@ -59,3 +59,24 @@ export const enablePushNotifications = async () => {
   await pushNotificationApi.subscribe(subscription)
   return subscription
 }
+
+export const getCurrentPushSubscription = async () => {
+  if (!isPushNotificationSupported() || Notification.permission !== 'granted') {
+    return null
+  }
+
+  const registration =
+    (await navigator.serviceWorker.getRegistration(serviceWorkerPath)) ??
+    (await navigator.serviceWorker.register(serviceWorkerPath))
+
+  return registration.pushManager.getSubscription()
+}
+
+export const sendTestPushNotification = async () => {
+  const subscription = await getCurrentPushSubscription()
+  if (!subscription) {
+    throw new Error('ยังไม่ได้เปิดการแจ้งเตือนบนเครื่องนี้')
+  }
+
+  await pushNotificationApi.test(subscription)
+}
