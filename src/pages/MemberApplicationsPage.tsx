@@ -131,7 +131,7 @@ export function MemberApplicationsPage({
           : pendingApplications[0]?.id || '',
       )
     } catch {
-      setNotice('โหลดข้อมูลการสมัครจาก API ไม่สำเร็จ')
+      setNotice('โหลดข้อมูลการสมัครไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setIsLoadingApplications(false)
     }
@@ -185,7 +185,7 @@ export function MemberApplicationsPage({
             )
           }
         } catch {
-          setNotice('รับข้อมูล realtime ไม่สำเร็จ')
+          setNotice('อัปเดตข้อมูลล่าสุดไม่สำเร็จ')
         }
       },
     })
@@ -274,8 +274,8 @@ export function MemberApplicationsPage({
       setExpandedApplicationId('')
       setNotice(
         status === 'approved'
-          ? 'ยืนยันการสมัครแล้ว ย้ายไปหน้า จัดการข้อมูลลูกค้าแล้ว'
-          : 'ปฏิเสธการสมัครแล้ว และลบข้อมูลออกจาก database แล้ว',
+          ? 'ยืนยันการสมัครแล้ว ข้อมูลลูกค้าถูกย้ายไปหน้าข้อมูลลูกค้าแล้ว'
+          : 'ปฏิเสธการสมัครแล้ว ลบข้อมูลการสมัครเรียบร้อยแล้ว',
       )
     } catch {
       setNotice('อัปเดตสถานะการสมัครไม่สำเร็จ')
@@ -391,8 +391,8 @@ export function MemberApplicationsPage({
         }
         description={
           isApprovingApplication
-            ? `ระบบจะย้ายข้อมูลของ ${pendingStatusCustomerName} ไปหน้า จัดการข้อมูลลูกค้า เปลี่ยน Rich Menu เป็น Member และส่งข้อความแจ้งลูกค้า`
-            : `ระบบจะลบข้อมูลการสมัครของ ${pendingStatusCustomerName} ออกจาก database เปลี่ยน Rich Menu กลับไปสมัครใหม่ และส่งข้อความแจ้งลูกค้าว่าไม่ผ่านเกณฑ์`
+            ? `ระบบจะยืนยันข้อมูลของ ${pendingStatusCustomerName} ย้ายไปหน้าข้อมูลลูกค้า และส่งข้อความแจ้งลูกค้า`
+            : `ระบบจะปฏิเสธข้อมูลของ ${pendingStatusCustomerName} ลบข้อมูลการสมัคร และส่งข้อความแจ้งลูกค้าว่าไม่ผ่านเกณฑ์`
         }
         isOpen={Boolean(pendingStatusChange)}
         onCancel={() => setPendingStatusChange(null)}

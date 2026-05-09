@@ -29,12 +29,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       setIsLoading(true)
       const nextSession = await authApi.login(payload)
       onLogin(nextSession)
-    } catch (error) {
-      setError(
-        error instanceof Error && error.message
-          ? error.message
-          : 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง',
-      )
+    } catch {
+      setError('เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง')
     } finally {
       setIsLoading(false)
     }

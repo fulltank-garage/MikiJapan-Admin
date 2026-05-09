@@ -80,7 +80,7 @@ export function MemberManagementPage({
       const data = isApiConfigured ? await memberApi.list() : []
       setCustomers(data)
     } catch {
-      setNotice('โหลดข้อมูลลูกค้าจาก API ไม่สำเร็จ')
+      setNotice('โหลดข้อมูลลูกค้าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setIsLoadingCustomers(false)
     }
@@ -120,7 +120,7 @@ export function MemberManagementPage({
             )
           }
         } catch {
-          setNotice('รับข้อมูล realtime ไม่สำเร็จ')
+          setNotice('อัปเดตข้อมูลล่าสุดไม่สำเร็จ')
         }
       },
     })
@@ -172,7 +172,7 @@ export function MemberManagementPage({
       setCustomers((current) =>
         current.filter((item) => item.id !== customer.id),
       )
-      setNotice('ลบข้อมูลลูกค้าแล้ว และเปลี่ยน Rich Menu กลับเป็น Register')
+      setNotice('ลบข้อมูลลูกค้าแล้ว ลูกค้าสามารถสมัครใหม่ได้')
     } catch {
       setNotice('ลบข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     }
@@ -188,7 +188,7 @@ export function MemberManagementPage({
 
       <ConfirmationDialog
         confirmLabel="ลบข้อมูลลูกค้า"
-        description={`ระบบจะลบข้อมูลของ ${pendingDeleteCustomerName} ออกจาก database และเปลี่ยน Rich Menu ของลูกค้ากลับเป็น Register`}
+        description={`ระบบจะลบข้อมูลของ ${pendingDeleteCustomerName} และให้ลูกค้าสามารถสมัครใหม่ได้อีกครั้ง`}
         isOpen={Boolean(pendingDeleteCustomer)}
         onCancel={() => setPendingDeleteCustomer(null)}
         onConfirm={() => {

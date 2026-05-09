@@ -73,7 +73,7 @@ export function DashboardPage({
         }
       } catch {
         if (isMounted) {
-          setNotice('เชื่อมต่อ API ไม่สำเร็จ')
+          setNotice('โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
         }
       } finally {
         if (isMounted) {
@@ -107,7 +107,7 @@ export function DashboardPage({
             )
           }
         } catch {
-          setNotice('รับจำนวนข้อมูลการสมัคร realtime ไม่สำเร็จ')
+          setNotice('อัปเดตข้อมูลล่าสุดไม่สำเร็จ')
         }
       },
     })
