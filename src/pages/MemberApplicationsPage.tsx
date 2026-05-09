@@ -81,6 +81,14 @@ const applicationDetailSkeletonFields = [
   'field-6',
 ]
 
+const rejectionReasonOptions = [
+  'รูปหน้าร้านไม่ชัดเจนหรือไม่ตรงกับร้าน',
+  'ข้อมูลชื่อ เบอร์โทร หรือเลขบัตรประชาชนไม่ถูกต้อง',
+  'ลิงก์ร้านหรือเพจเปิดไม่ได้',
+  'ข้อมูลร้านไม่ครบถ้วนตามเกณฑ์ที่ร้านกำหนด',
+  'พบข้อมูลสมัครซ้ำหรือข้อมูลไม่ตรงกับที่เคยแจ้งไว้',
+]
+
 const upsertApplication = (
   applications: MemberApplication[],
   nextApplication: MemberApplication,
@@ -113,6 +121,9 @@ export function MemberApplicationsPage({
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
   const [expandedApplicationId, setExpandedApplicationId] = useState('')
   const [notice, setNotice] = useState('')
+  const [selectedRejectionReasons, setSelectedRejectionReasons] = useState<
+    string[]
+  >([])
   const [pendingStatusChange, setPendingStatusChange] =
     useState<PendingStatusChange | null>(null)
   const [realtimeStatus, setRealtimeStatus] =
@@ -245,13 +256,19 @@ export function MemberApplicationsPage({
   const updateApplicationStatus = async (
     application: MemberApplication,
     status: ApplicationStatus,
+    rejectionReasons: string[] = [],
   ) => {
     setNotice('')
     setPendingStatusChange(null)
+    setSelectedRejectionReasons([])
 
     try {
       const updatedApplication = isApiConfigured
-        ? await applicationApi.updateStatus(application.id, status)
+        ? await applicationApi.updateStatus(
+            application.id,
+            status,
+            status === 'rejected' ? rejectionReasons : undefined,
+          )
         : { ...application, status }
 
       const remainingPendingApplications = customerApplications.filter(
@@ -286,6 +303,23 @@ export function MemberApplicationsPage({
     ? getApplicationFullName(pendingStatusChange.application)
     : ''
   const isApprovingApplication = pendingStatusChange?.status === 'approved'
+  const isRejectingApplication = pendingStatusChange?.status === 'rejected'
+  const isRejectConfirmDisabled =
+    isRejectingApplication && selectedRejectionReasons.length === 0
+
+  const toggleRejectionReason = (reason: string) => {
+    setSelectedRejectionReasons((current) =>
+      current.includes(reason)
+        ? current.filter((selectedReason) => selectedReason !== reason)
+        : [...current, reason],
+    )
+  }
+
+  const closeStatusDialog = () => {
+    setPendingStatusChange(null)
+    setSelectedRejectionReasons([])
+  }
+
   const renderApplicationDetail = (
     application: MemberApplication,
     variant: 'inline' | 'panel',
@@ -312,12 +346,13 @@ export function MemberApplicationsPage({
           <button
             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#9a7655] px-3 text-sm font-semibold text-white transition hover:bg-[#8f6847] disabled:cursor-not-allowed disabled:opacity-55"
             disabled={application.status === 'approved'}
-            onClick={() =>
+            onClick={() => {
+              setSelectedRejectionReasons([])
               setPendingStatusChange({
                 application,
                 status: 'approved',
               })
-            }
+            }}
             type="button"
           >
             <CheckCircle2 size={17} />
@@ -327,12 +362,13 @@ export function MemberApplicationsPage({
           <button
             className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#d8b8a7] bg-white px-3 text-sm font-semibold text-[#9a5f45] transition hover:bg-[#f8eee8] disabled:cursor-not-allowed disabled:opacity-55"
             disabled={application.status === 'rejected'}
-            onClick={() =>
+            onClick={() => {
+              setSelectedRejectionReasons([])
               setPendingStatusChange({
                 application,
                 status: 'rejected',
               })
-            }
+            }}
             type="button"
           >
             <XCircle size={17} />
@@ -389,21 +425,31 @@ export function MemberApplicationsPage({
         confirmLabel={
           isApprovingApplication ? 'ยืนยันการสมัคร' : 'ปฏิเสธการสมัคร'
         }
+        confirmDisabled={isRejectConfirmDisabled}
         description={
           isApprovingApplication
             ? `ระบบจะยืนยันข้อมูลของ ${pendingStatusCustomerName} ย้ายไปหน้าข้อมูลลูกค้า และส่งข้อความแจ้งลูกค้า`
-            : `ระบบจะปฏิเสธข้อมูลของ ${pendingStatusCustomerName} ลบข้อมูลการสมัคร และส่งข้อความแจ้งลูกค้าว่าไม่ผ่านเกณฑ์`
+            : `เลือกเหตุผลที่ข้อมูลของ ${pendingStatusCustomerName} ไม่ผ่านเกณฑ์ ระบบจะลบข้อมูลการสมัครและส่งข้อความแจ้งลูกค้า`
         }
         isOpen={Boolean(pendingStatusChange)}
-        onCancel={() => setPendingStatusChange(null)}
+        onCancel={closeStatusDialog}
         onConfirm={() => {
           if (!pendingStatusChange) {
+            return
+          }
+
+          if (
+            pendingStatusChange.status === 'rejected' &&
+            selectedRejectionReasons.length === 0
+          ) {
+            setNotice('กรุณาเลือกเหตุผลที่ไม่ผ่านเกณฑ์อย่างน้อย 1 ข้อ')
             return
           }
 
           void updateApplicationStatus(
             pendingStatusChange.application,
             pendingStatusChange.status,
+            selectedRejectionReasons,
           )
         }}
         title={
@@ -412,7 +458,36 @@ export function MemberApplicationsPage({
             : 'ปฏิเสธการสมัครนี้หรือไม่?'
         }
         variant={isApprovingApplication ? 'primary' : 'danger'}
-      />
+      >
+        {isRejectingApplication ? (
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              เหตุผลที่ไม่ผ่านเกณฑ์
+            </p>
+            <div className="mt-2 space-y-2">
+              {rejectionReasonOptions.map((reason) => (
+                <label
+                  className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#ead8c7] bg-[#fff8f1] px-3 py-2.5 text-sm leading-6 text-slate-700 transition hover:border-[#d8b8a7]"
+                  key={reason}
+                >
+                  <input
+                    checked={selectedRejectionReasons.includes(reason)}
+                    className="mt-1 size-4 accent-[#9a5f45]"
+                    onChange={() => toggleRejectionReason(reason)}
+                    type="checkbox"
+                  />
+                  <span>{reason}</span>
+                </label>
+              ))}
+            </div>
+            {isRejectConfirmDisabled ? (
+              <p className="mt-2 text-xs font-medium leading-5 text-[#9a5f45]">
+                ต้องเลือกเหตุผลอย่างน้อย 1 ข้อก่อนยืนยันการปฏิเสธ
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </ConfirmationDialog>
 
       <AdminMobileMenu
         activePage="messages"

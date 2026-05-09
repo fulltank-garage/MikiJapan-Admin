@@ -1,11 +1,13 @@
 import { AlertTriangle, CheckCircle2, X } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 
 type ConfirmationDialogVariant = 'primary' | 'danger'
 
 type ConfirmationDialogProps = {
   cancelLabel?: string
+  children?: ReactNode
   confirmLabel: string
+  confirmDisabled?: boolean
   description: string
   isOpen: boolean
   onCancel: () => void
@@ -36,7 +38,9 @@ const variantMeta = {
 
 export function ConfirmationDialog({
   cancelLabel = 'ยกเลิก',
+  children,
   confirmLabel,
+  confirmDisabled = false,
   description,
   isOpen,
   onCancel,
@@ -93,6 +97,7 @@ export function ConfirmationDialog({
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {description}
             </p>
+            {children ? <div className="mt-4">{children}</div> : null}
           </div>
 
           <button
@@ -114,7 +119,8 @@ export function ConfirmationDialog({
             {cancelLabel}
           </button>
           <button
-            className={`inline-flex h-11 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition ${meta.buttonClassName}`}
+            className={`inline-flex h-11 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${meta.buttonClassName}`}
+            disabled={confirmDisabled}
             onClick={onConfirm}
             type="button"
           >

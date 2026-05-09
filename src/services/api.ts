@@ -137,10 +137,14 @@ export const applicationApi = {
     return data
   },
 
-  async updateStatus(id: string, status: ApplicationStatus) {
+  async updateStatus(
+    id: string,
+    status: ApplicationStatus,
+    rejectionReasons?: string[],
+  ) {
     const { data } = await api.patch<MemberApplication>(
       `/member-applications/${id}/status`,
-      { status },
+      { rejectionReasons, status },
     )
     return data
   },
