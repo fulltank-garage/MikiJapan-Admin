@@ -55,6 +55,11 @@ export type AuthSession = {
   }
 }
 
+export type PushPublicKeyResponse = {
+  configured: boolean
+  publicKey: string
+}
+
 const defaultApiBaseUrl =
   'https://mikijapan-api-production-7e32.up.railway.app/api'
 const apiBaseUrl =
@@ -151,6 +156,27 @@ export const applicationApi = {
 
   async remove(id: string) {
     await api.delete(`/member-applications/${id}`)
+  },
+}
+
+export const pushNotificationApi = {
+  async getPublicKey() {
+    const { data } = await api.get<PushPublicKeyResponse>(
+      '/push-notifications/public-key',
+    )
+    return data
+  },
+
+  async subscribe(subscription: PushSubscription) {
+    await api.post('/push-notifications/subscriptions', subscription.toJSON())
+  },
+
+  async unsubscribe(subscription: PushSubscription) {
+    await api.delete('/push-notifications/subscriptions', {
+      data: {
+        endpoint: subscription.endpoint,
+      },
+    })
   },
 }
 

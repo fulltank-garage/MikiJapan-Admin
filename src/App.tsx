@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { DashboardPage } from './pages/DashboardPage'
+import { AppSnackbar } from './components/AppSnackbar'
 import { LoginPage } from './pages/LoginPage'
 import { MemberApplicationsPage } from './pages/MemberApplicationsPage'
 import { MemberManagementPage } from './pages/MemberManagementPage'
+import { PushNotificationPrompt } from './components/PushNotificationPrompt'
 import {
   applicationApi,
   isApiConfigured,
@@ -56,6 +58,7 @@ function App() {
   const [pendingApplicationCount, setPendingApplicationCountState] = useState(
     () => getStoredPendingApplicationCount(),
   )
+  const [notice, setNotice] = useState('')
 
   const setPendingApplicationCount = useCallback(
     (nextValue: number | ((current: number) => number)) => {
@@ -160,36 +163,48 @@ function App() {
 
   if (activePage === 'customers') {
     return (
-      <MemberManagementPage
-        onLogout={handleLogout}
-        onOpenDashboard={() => openPage('dashboard')}
-        onOpenMessages={() => openPage('messages')}
-        pendingApplicationCount={pendingApplicationCount}
-        session={session}
-      />
+      <>
+        <AppSnackbar message={notice} onClose={() => setNotice('')} />
+        <PushNotificationPrompt onNotice={setNotice} />
+        <MemberManagementPage
+          onLogout={handleLogout}
+          onOpenDashboard={() => openPage('dashboard')}
+          onOpenMessages={() => openPage('messages')}
+          pendingApplicationCount={pendingApplicationCount}
+          session={session}
+        />
+      </>
     )
   }
 
   if (activePage === 'messages') {
     return (
-      <MemberApplicationsPage
-        onBackToDashboard={() => openPage('dashboard')}
-        onLogout={handleLogout}
-        onOpenCustomers={() => openPage('customers')}
-        pendingApplicationCount={pendingApplicationCount}
-        session={session}
-      />
+      <>
+        <AppSnackbar message={notice} onClose={() => setNotice('')} />
+        <PushNotificationPrompt onNotice={setNotice} />
+        <MemberApplicationsPage
+          onBackToDashboard={() => openPage('dashboard')}
+          onLogout={handleLogout}
+          onOpenCustomers={() => openPage('customers')}
+          pendingApplicationCount={pendingApplicationCount}
+          session={session}
+        />
+      </>
     )
   }
 
   return (
-    <DashboardPage
-      onLogout={handleLogout}
-      onOpenMessages={() => openPage('messages')}
-      onOpenCustomers={() => openPage('customers')}
-      pendingApplicationCount={pendingApplicationCount}
-      session={session}
-    />
+    <>
+      <AppSnackbar message={notice} onClose={() => setNotice('')} />
+      <PushNotificationPrompt onNotice={setNotice} />
+      <DashboardPage
+        onLogout={handleLogout}
+        onOpenMessages={() => openPage('messages')}
+        onOpenCustomers={() => openPage('customers')}
+        pendingApplicationCount={pendingApplicationCount}
+        session={session}
+      />
+    </>
   )
 }
 
