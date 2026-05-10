@@ -36,6 +36,7 @@ type MemberApplicationsPageProps = {
   onBackToDashboard: () => void
   onLogout: () => void
   onOpenCustomers: () => void
+  onRefreshPendingApplicationCount: () => void
   pendingApplicationCount: number
   session: AuthSession
 }
@@ -111,6 +112,7 @@ export function MemberApplicationsPage({
   onBackToDashboard,
   onLogout,
   onOpenCustomers,
+  onRefreshPendingApplicationCount,
   pendingApplicationCount,
   session,
 }: MemberApplicationsPageProps) {
@@ -499,6 +501,7 @@ export function MemberApplicationsPage({
         onOpenCustomers={onOpenCustomers}
         onOpenDashboard={onBackToDashboard}
         onOpenMessages={() => setIsMobileMenuOpen(false)}
+        onRefreshPendingApplicationCount={onRefreshPendingApplicationCount}
         pendingApplicationCount={pendingApplicationCount}
         session={session}
       />

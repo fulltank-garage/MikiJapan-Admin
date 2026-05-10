@@ -17,6 +17,7 @@ type AdminMobileMenuProps = {
   onOpenCustomers: () => void
   onOpenDashboard: () => void
   onOpenMessages: () => void
+  onRefreshPendingApplicationCount?: () => void
   pendingApplicationCount?: number
   session: AuthSession
 }
@@ -52,6 +53,7 @@ export function AdminMobileMenu({
   onOpenCustomers,
   onOpenDashboard,
   onOpenMessages,
+  onRefreshPendingApplicationCount,
   pendingApplicationCount = 0,
   session,
 }: AdminMobileMenuProps) {
@@ -69,12 +71,17 @@ export function AdminMobileMenu({
 
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleKeyDown)
+    onRefreshPendingApplicationCount?.()
+    const refreshTimer = window.setInterval(() => {
+      onRefreshPendingApplicationCount?.()
+    }, 5000)
 
     return () => {
+      window.clearInterval(refreshTimer)
       document.body.style.overflow = originalOverflow
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, onRefreshPendingApplicationCount])
 
   const actions: Record<AdminPageKey, () => void> = {
     dashboard: onOpenDashboard,

@@ -134,6 +134,18 @@ function App() {
   })
 
   useEffect(() => {
+    if (!session || isStarting) {
+      return
+    }
+
+    const fallbackTimer = window.setInterval(() => {
+      void loadPendingApplicationCount()
+    }, 10000)
+
+    return () => window.clearInterval(fallbackTimer)
+  }, [isStarting, loadPendingApplicationCount, session])
+
+  useEffect(() => {
     if (!session) {
       return
     }
@@ -217,6 +229,7 @@ function App() {
           onLogout={handleLogout}
           onOpenDashboard={() => openPage('dashboard')}
           onOpenMessages={() => openPage('messages')}
+          onRefreshPendingApplicationCount={loadPendingApplicationCount}
           pendingApplicationCount={pendingApplicationCount}
           session={session}
         />
@@ -233,6 +246,7 @@ function App() {
           onBackToDashboard={() => openPage('dashboard')}
           onLogout={handleLogout}
           onOpenCustomers={() => openPage('customers')}
+          onRefreshPendingApplicationCount={loadPendingApplicationCount}
           pendingApplicationCount={pendingApplicationCount}
           session={session}
         />
@@ -248,6 +262,7 @@ function App() {
         onLogout={handleLogout}
         onOpenMessages={() => openPage('messages')}
         onOpenCustomers={() => openPage('customers')}
+        onRefreshPendingApplicationCount={loadPendingApplicationCount}
         pendingApplicationCount={pendingApplicationCount}
         session={session}
       />
