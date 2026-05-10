@@ -31,6 +31,7 @@ type MemberManagementPageProps = {
   onOpenDashboard: () => void
   onOpenMessages: () => void
   onRefreshPendingApplicationCount: () => void
+  pendingApplicationLastSyncedAt: number
   pendingApplicationCount: number
   session: AuthSession
 }
@@ -65,6 +66,7 @@ export function MemberManagementPage({
   onOpenDashboard,
   onOpenMessages,
   onRefreshPendingApplicationCount,
+  pendingApplicationLastSyncedAt,
   pendingApplicationCount,
   session,
 }: MemberManagementPageProps) {
@@ -215,6 +217,7 @@ export function MemberManagementPage({
         onOpenDashboard={onOpenDashboard}
         onOpenMessages={onOpenMessages}
         onRefreshPendingApplicationCount={onRefreshPendingApplicationCount}
+        pendingApplicationLastSyncedAt={pendingApplicationLastSyncedAt}
         pendingApplicationCount={pendingApplicationCount}
         session={session}
       />

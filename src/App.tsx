@@ -19,6 +19,8 @@ type AdminPage = 'dashboard' | 'customers' | 'messages'
 
 const activePageStorageKey = 'admin_active_page'
 const pendingApplicationCountStorageKey = 'admin_pending_application_count'
+const pendingApplicationLastSyncedAtStorageKey =
+  'admin_pending_application_last_synced_at'
 const appBuildStorageKey = 'admin_app_build_id'
 const adminPages: AdminPage[] = ['dashboard', 'customers', 'messages']
 
@@ -52,6 +54,13 @@ const getStoredPendingApplicationCount = () => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
 }
 
+const getStoredPendingApplicationLastSyncedAt = () => {
+  const stored = browserStorage.get(pendingApplicationLastSyncedAtStorageKey)
+  const parsed = stored ? Number(stored) : 0
+
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
+}
+
 function App() {
   const initialSession = getStoredSession()
   const storedBuildId = browserStorage.get(appBuildStorageKey)
@@ -67,6 +76,10 @@ function App() {
   const [pendingApplicationCount, setPendingApplicationCountState] = useState(
     () => getStoredPendingApplicationCount(),
   )
+  const [
+    pendingApplicationLastSyncedAt,
+    setPendingApplicationLastSyncedAtState,
+  ] = useState(() => getStoredPendingApplicationLastSyncedAt())
   const [isStarting, setIsStarting] = useState(Boolean(initialSession))
   const [startupProgress, setStartupProgress] = useState(0)
   const [isUpdatedStartup] = useState(hasAppUpdate)
@@ -110,6 +123,15 @@ function App() {
     [],
   )
 
+  const markPendingApplicationSynced = useCallback(() => {
+    const nextSyncedAt = Date.now()
+    browserStorage.set(
+      pendingApplicationLastSyncedAtStorageKey,
+      String(nextSyncedAt),
+    )
+    setPendingApplicationLastSyncedAtState(nextSyncedAt)
+  }, [])
+
   const loadPendingApplicationCount = useCallback(async () => {
     if (!session || !isApiConfigured) {
       return
@@ -121,10 +143,11 @@ function App() {
         applications.filter((application) => application.status === 'pending')
           .length,
       )
+      markPendingApplicationSynced()
     } catch {
       // Keep the cached count visible; the websocket or next refresh can correct it.
     }
-  }, [session, setPendingApplicationCount])
+  }, [markPendingApplicationSynced, session, setPendingApplicationCount])
 
   useAppResumeRefresh({
     enabled: Boolean(session),
@@ -161,6 +184,7 @@ function App() {
           event.data.status === 'pending'
         ) {
           setPendingApplicationCount((current) => current + 1)
+          markPendingApplicationSynced()
           return
         }
 
@@ -169,6 +193,7 @@ function App() {
           event.data.status !== 'pending'
         ) {
           setPendingApplicationCount((current) => current - 1)
+          markPendingApplicationSynced()
           return
         }
 
@@ -177,6 +202,7 @@ function App() {
           event.data.status === 'pending'
         ) {
           setPendingApplicationCount((current) => current - 1)
+          markPendingApplicationSynced()
         }
       },
     })
@@ -185,7 +211,12 @@ function App() {
       window.clearTimeout(initialLoadTimer)
       unsubscribe()
     }
-  }, [loadPendingApplicationCount, session, setPendingApplicationCount])
+  }, [
+    loadPendingApplicationCount,
+    markPendingApplicationSynced,
+    session,
+    setPendingApplicationCount,
+  ])
 
   const openPage = (page: AdminPage) => {
     browserStorage.set(activePageStorageKey, page)
@@ -204,8 +235,10 @@ function App() {
     browserStorage.remove('admin_session')
     browserStorage.remove(activePageStorageKey)
     browserStorage.remove(pendingApplicationCountStorageKey)
+    browserStorage.remove(pendingApplicationLastSyncedAtStorageKey)
     browserStorage.remove(appBuildStorageKey)
     setPendingApplicationCountState(0)
+    setPendingApplicationLastSyncedAtState(0)
     setSession(null)
     setActivePage('dashboard')
   }
@@ -230,6 +263,7 @@ function App() {
           onOpenDashboard={() => openPage('dashboard')}
           onOpenMessages={() => openPage('messages')}
           onRefreshPendingApplicationCount={loadPendingApplicationCount}
+          pendingApplicationLastSyncedAt={pendingApplicationLastSyncedAt}
           pendingApplicationCount={pendingApplicationCount}
           session={session}
         />
@@ -247,6 +281,7 @@ function App() {
           onLogout={handleLogout}
           onOpenCustomers={() => openPage('customers')}
           onRefreshPendingApplicationCount={loadPendingApplicationCount}
+          pendingApplicationLastSyncedAt={pendingApplicationLastSyncedAt}
           pendingApplicationCount={pendingApplicationCount}
           session={session}
         />
@@ -263,6 +298,7 @@ function App() {
         onOpenMessages={() => openPage('messages')}
         onOpenCustomers={() => openPage('customers')}
         onRefreshPendingApplicationCount={loadPendingApplicationCount}
+        pendingApplicationLastSyncedAt={pendingApplicationLastSyncedAt}
         pendingApplicationCount={pendingApplicationCount}
         session={session}
       />

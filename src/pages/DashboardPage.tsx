@@ -26,6 +26,7 @@ type DashboardPageProps = {
   onOpenCustomers: () => void
   onOpenMessages: () => void
   onRefreshPendingApplicationCount: () => void
+  pendingApplicationLastSyncedAt: number
   pendingApplicationCount: number
   session: AuthSession
 }
@@ -52,6 +53,7 @@ export function DashboardPage({
   onOpenCustomers,
   onOpenMessages,
   onRefreshPendingApplicationCount,
+  pendingApplicationLastSyncedAt,
   pendingApplicationCount,
   session,
 }: DashboardPageProps) {
@@ -170,6 +172,7 @@ export function DashboardPage({
         onOpenDashboard={() => setIsMobileMenuOpen(false)}
         onOpenMessages={onOpenMessages}
         onRefreshPendingApplicationCount={onRefreshPendingApplicationCount}
+        pendingApplicationLastSyncedAt={pendingApplicationLastSyncedAt}
         pendingApplicationCount={pendingApplicationCount}
         session={session}
       />
