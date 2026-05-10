@@ -24,6 +24,7 @@ import {
   type MemberApplication,
   type RealtimeStatus,
 } from '../services/api'
+import { useAppResumeRefresh } from '../hooks/useAppResumeRefresh'
 
 type MemberManagementPageProps = {
   onLogout: () => void
@@ -86,6 +87,12 @@ export function MemberManagementPage({
     }
   }, [])
 
+  useAppResumeRefresh({
+    onRefresh: () => {
+      void loadCustomers()
+    },
+  })
+
   useEffect(() => {
     const initialLoadTimer = window.setTimeout(() => {
       void loadCustomers()
@@ -127,13 +134,9 @@ export function MemberManagementPage({
   }, [])
 
   useEffect(() => {
-    if (realtimeStatus === 'connected') {
-      return
-    }
-
     const fallbackTimer = window.setInterval(() => {
       loadCustomers()
-    }, 10000)
+    }, realtimeStatus === 'connected' ? 30000 : 10000)
 
     return () => window.clearInterval(fallbackTimer)
   }, [loadCustomers, realtimeStatus])

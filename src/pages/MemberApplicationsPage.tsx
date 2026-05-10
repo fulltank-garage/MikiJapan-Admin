@@ -30,6 +30,7 @@ import {
   type MemberApplication,
   type RealtimeStatus,
 } from '../services/api'
+import { useAppResumeRefresh } from '../hooks/useAppResumeRefresh'
 
 type MemberApplicationsPageProps = {
   onBackToDashboard: () => void
@@ -148,6 +149,12 @@ export function MemberApplicationsPage({
     }
   }, [])
 
+  useAppResumeRefresh({
+    onRefresh: () => {
+      void loadApplications()
+    },
+  })
+
   useEffect(() => {
     const initialLoadTimer = window.setTimeout(() => {
       void loadApplications()
@@ -203,13 +210,9 @@ export function MemberApplicationsPage({
   }, [])
 
   useEffect(() => {
-    if (realtimeStatus === 'connected') {
-      return
-    }
-
     const fallbackTimer = window.setInterval(() => {
       loadApplications()
-    }, 10000)
+    }, realtimeStatus === 'connected' ? 30000 : 10000)
 
     return () => window.clearInterval(fallbackTimer)
   }, [loadApplications, realtimeStatus])

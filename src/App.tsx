@@ -12,6 +12,7 @@ import {
   subscribeApplicationEvents,
   type AuthSession,
 } from './services/api'
+import { useAppResumeRefresh } from './hooks/useAppResumeRefresh'
 import { browserStorage } from './utils/browserStorage'
 
 type AdminPage = 'dashboard' | 'customers' | 'messages'
@@ -124,6 +125,13 @@ function App() {
       // Keep the cached count visible; the websocket or next refresh can correct it.
     }
   }, [session, setPendingApplicationCount])
+
+  useAppResumeRefresh({
+    enabled: Boolean(session),
+    onRefresh: () => {
+      void loadPendingApplicationCount()
+    },
+  })
 
   useEffect(() => {
     if (!session) {

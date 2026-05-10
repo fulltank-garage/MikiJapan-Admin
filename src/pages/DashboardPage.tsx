@@ -5,7 +5,7 @@ import {
   Menu,
   UsersRound,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AdminMobileMenu } from '../components/AdminMobileMenu'
 import { AppSnackbar } from '../components/AppSnackbar'
 import { LoadingSkeletonBlock } from '../components/LoadingSkeleton'
@@ -18,6 +18,7 @@ import {
   type MemberApplication,
   type MemberApplicationEvent,
 } from '../services/api'
+import { useAppResumeRefresh } from '../hooks/useAppResumeRefresh'
 import { numberFormatter } from '../utils/formatters'
 
 type DashboardPageProps = {
@@ -57,6 +58,27 @@ export function DashboardPage({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
 
+  const loadCustomers = useCallback(async () => {
+    if (!isApiConfigured) {
+      return
+    }
+
+    try {
+      const data = await memberApi.list()
+      setCustomers(data)
+    } catch {
+      setNotice('โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setIsLoadingCustomers(false)
+    }
+  }, [])
+
+  useAppResumeRefresh({
+    onRefresh: () => {
+      void loadCustomers()
+    },
+  })
+
   useEffect(() => {
     if (!isApiConfigured) {
       return
@@ -64,7 +86,7 @@ export function DashboardPage({
 
     let isMounted = true
 
-    const loadCustomers = async () => {
+    const loadInitialCustomers = async () => {
       try {
         const data = await memberApi.list()
 
@@ -82,7 +104,7 @@ export function DashboardPage({
       }
     }
 
-    loadCustomers()
+    loadInitialCustomers()
 
     return () => {
       isMounted = false

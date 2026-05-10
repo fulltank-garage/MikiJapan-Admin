@@ -238,11 +238,19 @@ export const subscribeApplicationEvents = ({
   let retryTimer: ReturnType<typeof setTimeout> | null = null
   let retryCount = 0
   let isClosed = false
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
   const clearRetry = () => {
     if (retryTimer) {
       clearTimeout(retryTimer)
       retryTimer = null
+    }
+  }
+
+  const clearReconnect = () => {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer)
+      reconnectTimer = null
     }
   }
 
@@ -284,11 +292,42 @@ export const subscribeApplicationEvents = ({
     }
   }
 
+  const reconnect = () => {
+    if (isClosed || document.visibilityState === 'hidden') {
+      return
+    }
+
+    clearRetry()
+    clearReconnect()
+    socket?.close()
+    onStatus?.('reconnecting')
+    reconnectTimer = setTimeout(connect, 100)
+  }
+
+  const reconnectWhenActive = () => {
+    if (document.visibilityState !== 'hidden') {
+      reconnect()
+    }
+  }
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      reconnect()
+    }
+  }
+
   connect()
+  window.addEventListener('focus', reconnectWhenActive)
+  window.addEventListener('online', reconnectWhenActive)
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 
   return () => {
     isClosed = true
     clearRetry()
+    clearReconnect()
+    window.removeEventListener('focus', reconnectWhenActive)
+    window.removeEventListener('online', reconnectWhenActive)
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
     onStatus?.('off')
     socket?.close()
   }
