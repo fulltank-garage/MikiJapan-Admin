@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { browserStorage } from '../utils/browserStorage'
 
 export type CustomerStatus = 'active' | 'pending' | 'inactive'
 export type CustomerSegment = 'VIP' | 'Regular' | 'New'
@@ -91,7 +92,7 @@ export const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('admin_token')
+  const token = browserStorage.get('admin_token')
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -205,7 +206,6 @@ export const pushNotificationApi = {
       },
     })
   },
-
 }
 
 const createApplicationEventsSocket = () => {
@@ -213,7 +213,7 @@ const createApplicationEventsSocket = () => {
     return null
   }
 
-  const token = localStorage.getItem('admin_token')
+  const token = browserStorage.get('admin_token')
   if (!token) {
     return null
   }

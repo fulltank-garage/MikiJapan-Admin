@@ -11,6 +11,7 @@ import {
   subscribeApplicationEvents,
   type AuthSession,
 } from './services/api'
+import { browserStorage } from './utils/browserStorage'
 
 type AdminPage = 'dashboard' | 'customers' | 'messages'
 
@@ -19,7 +20,7 @@ const pendingApplicationCountStorageKey = 'admin_pending_application_count'
 const adminPages: AdminPage[] = ['dashboard', 'customers', 'messages']
 
 const getStoredSession = () => {
-  const stored = localStorage.getItem('admin_session')
+  const stored = browserStorage.get('admin_session')
 
   if (!stored) {
     return null
@@ -28,21 +29,21 @@ const getStoredSession = () => {
   try {
     return JSON.parse(stored) as AuthSession
   } catch {
-    localStorage.removeItem('admin_session')
-    localStorage.removeItem('admin_token')
+    browserStorage.remove('admin_session')
+    browserStorage.remove('admin_token')
     return null
   }
 }
 
 const getStoredActivePage = (): AdminPage => {
-  const stored = localStorage.getItem(activePageStorageKey)
+  const stored = browserStorage.get(activePageStorageKey)
   return adminPages.includes(stored as AdminPage)
     ? (stored as AdminPage)
     : 'dashboard'
 }
 
 const getStoredPendingApplicationCount = () => {
-  const stored = localStorage.getItem(pendingApplicationCountStorageKey)
+  const stored = browserStorage.get(pendingApplicationCountStorageKey)
   const parsed = stored ? Number(stored) : 0
 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
@@ -67,7 +68,7 @@ function App() {
           typeof nextValue === 'function' ? nextValue(current) : nextValue
         const normalizedValue = Math.max(0, resolvedValue)
 
-        localStorage.setItem(
+        browserStorage.set(
           pendingApplicationCountStorageKey,
           String(normalizedValue),
         )
@@ -137,21 +138,21 @@ function App() {
   }, [loadPendingApplicationCount, session, setPendingApplicationCount])
 
   const openPage = (page: AdminPage) => {
-    localStorage.setItem(activePageStorageKey, page)
+    browserStorage.set(activePageStorageKey, page)
     setActivePage(page)
   }
 
   const handleLogin = (nextSession: AuthSession) => {
-    localStorage.setItem('admin_token', nextSession.token)
-    localStorage.setItem('admin_session', JSON.stringify(nextSession))
+    browserStorage.set('admin_token', nextSession.token)
+    browserStorage.set('admin_session', JSON.stringify(nextSession))
     setSession(nextSession)
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token')
-    localStorage.removeItem('admin_session')
-    localStorage.removeItem(activePageStorageKey)
-    localStorage.removeItem(pendingApplicationCountStorageKey)
+    browserStorage.remove('admin_token')
+    browserStorage.remove('admin_session')
+    browserStorage.remove(activePageStorageKey)
+    browserStorage.remove(pendingApplicationCountStorageKey)
     setPendingApplicationCountState(0)
     setSession(null)
     setActivePage('dashboard')
