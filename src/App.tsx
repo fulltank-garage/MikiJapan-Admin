@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage'
 import { MemberApplicationsPage } from './pages/MemberApplicationsPage'
 import { MemberManagementPage } from './pages/MemberManagementPage'
 import { PushNotificationPrompt } from './components/PushNotificationPrompt'
+import { StartupSplash } from './components/StartupSplash'
 import {
   applicationApi,
   isApiConfigured,
@@ -17,6 +18,7 @@ type AdminPage = 'dashboard' | 'customers' | 'messages'
 
 const activePageStorageKey = 'admin_active_page'
 const pendingApplicationCountStorageKey = 'admin_pending_application_count'
+const appBuildStorageKey = 'admin_app_build_id'
 const adminPages: AdminPage[] = ['dashboard', 'customers', 'messages']
 
 const getStoredSession = () => {
@@ -50,8 +52,13 @@ const getStoredPendingApplicationCount = () => {
 }
 
 function App() {
+  const initialSession = getStoredSession()
+  const storedBuildId = browserStorage.get(appBuildStorageKey)
+  const hasAppUpdate = Boolean(
+    initialSession && storedBuildId && storedBuildId !== __APP_BUILD_ID__,
+  )
   const [session, setSession] = useState<AuthSession | null>(() =>
-    getStoredSession(),
+    initialSession,
   )
   const [activePage, setActivePage] = useState<AdminPage>(() =>
     getStoredActivePage(),
@@ -59,7 +66,30 @@ function App() {
   const [pendingApplicationCount, setPendingApplicationCountState] = useState(
     () => getStoredPendingApplicationCount(),
   )
+  const [isStarting, setIsStarting] = useState(Boolean(initialSession))
+  const [startupProgress, setStartupProgress] = useState(0)
+  const [isUpdatedStartup] = useState(hasAppUpdate)
   const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    if (!session || !isStarting) {
+      return
+    }
+
+    let nextProgress = 0
+    const progressTimer = window.setInterval(() => {
+      nextProgress = Math.min(100, nextProgress + 12)
+      setStartupProgress(nextProgress)
+
+      if (nextProgress >= 100) {
+        window.clearInterval(progressTimer)
+        browserStorage.set(appBuildStorageKey, __APP_BUILD_ID__)
+        window.setTimeout(() => setIsStarting(false), 120)
+      }
+    }, 90)
+
+    return () => window.clearInterval(progressTimer)
+  }, [isStarting, session])
 
   const setPendingApplicationCount = useCallback(
     (nextValue: number | ((current: number) => number)) => {
@@ -145,6 +175,7 @@ function App() {
   const handleLogin = (nextSession: AuthSession) => {
     browserStorage.set('admin_token', nextSession.token)
     browserStorage.set('admin_session', JSON.stringify(nextSession))
+    browserStorage.set(appBuildStorageKey, __APP_BUILD_ID__)
     setSession(nextSession)
   }
 
@@ -153,6 +184,7 @@ function App() {
     browserStorage.remove('admin_session')
     browserStorage.remove(activePageStorageKey)
     browserStorage.remove(pendingApplicationCountStorageKey)
+    browserStorage.remove(appBuildStorageKey)
     setPendingApplicationCountState(0)
     setSession(null)
     setActivePage('dashboard')
@@ -160,6 +192,12 @@ function App() {
 
   if (!session) {
     return <LoginPage onLogin={handleLogin} />
+  }
+
+  if (isStarting) {
+    return (
+      <StartupSplash isUpdated={isUpdatedStartup} progress={startupProgress} />
+    )
   }
 
   if (activePage === 'customers') {
