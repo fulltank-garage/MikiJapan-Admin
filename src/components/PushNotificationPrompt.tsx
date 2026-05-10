@@ -15,8 +15,10 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
     typeof window === 'undefined' ? 'unsupported' : getCurrentPushPermission(),
   )
   const [isEnabling, setIsEnabling] = useState(false)
+  const isDenied = permission === 'denied'
+  const isGranted = permission === 'granted'
 
-  if (!isPushNotificationSupported()) {
+  if (!isPushNotificationSupported() || isGranted) {
     return null
   }
 
@@ -33,9 +35,6 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
     }
   }
 
-  const isDenied = permission === 'denied'
-  const isGranted = permission === 'granted'
-
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 px-4 sm:inset-x-auto sm:right-4 sm:w-96">
       <div className="rounded-2xl border border-[#ead8c7] bg-white p-4 shadow-xl">
@@ -48,11 +47,9 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
               แจ้งเตือนเมื่อมีผู้สมัครใหม่
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-500">
-              {isGranted
-                ? 'เปิดแล้ว ระบบจะแจ้งเตือนเมื่อมีผู้สมัครใหม่'
-                : isDenied
-                  ? 'Browser ปิดสิทธิ์แจ้งเตือน ต้องเปิด permission จากการตั้งค่า Browser ก่อน'
-                  : 'เปิดไว้เพื่อให้ระบบแจ้งเตือนแม้ไม่ได้อยู่หน้าเว็บ Admin'}
+              {isDenied
+                ? 'Browser ปิดสิทธิ์แจ้งเตือน ต้องเปิด permission จากการตั้งค่า Browser ก่อน'
+                : 'เปิดไว้เพื่อให้ระบบแจ้งเตือนแม้ไม่ได้อยู่หน้าเว็บ Admin'}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
@@ -63,9 +60,7 @@ export function PushNotificationPrompt({ onNotice }: PushNotificationPromptProps
               >
                 {isDenied
                   ? 'ถูกปิดใน Browser'
-                  : isGranted
-                    ? 'เปิดแล้ว'
-                    : isEnabling
+                  : isEnabling
                       ? 'กำลังเปิด...'
                       : 'เปิดการแจ้งเตือน'}
               </button>
