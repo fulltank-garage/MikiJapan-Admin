@@ -7,6 +7,7 @@ import { MemberManagementPage } from './pages/MemberManagementPage'
 import { PushNotificationPrompt } from './components/PushNotificationPrompt'
 import { StartupSplash } from './components/StartupSplash'
 import {
+  adminAuthExpiredEvent,
   applicationApi,
   isApiConfigured,
   subscribeApplicationEvents,
@@ -23,19 +24,53 @@ const pendingApplicationLastSyncedAtStorageKey =
   'admin_pending_application_last_synced_at'
 const appBuildStorageKey = 'admin_app_build_id'
 const adminPages: AdminPage[] = ['dashboard', 'customers', 'messages']
+let didExpireStoredSession = false
+
+const clearStoredAdminSession = () => {
+  browserStorage.remove('admin_token')
+  browserStorage.remove('admin_session')
+}
+
+const isJwtExpired = (token: string) => {
+  try {
+    const payload = token.split('.')[1]
+    if (!payload) {
+      return true
+    }
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const paddedPayload = normalizedPayload.padEnd(
+      normalizedPayload.length + ((4 - (normalizedPayload.length % 4)) % 4),
+      '=',
+    )
+    const decodedPayload = JSON.parse(window.atob(paddedPayload)) as {
+      exp?: number
+    }
+
+    return Boolean(decodedPayload.exp && decodedPayload.exp * 1000 <= Date.now())
+  } catch {
+    return true
+  }
+}
 
 const getStoredSession = () => {
   const stored = browserStorage.get('admin_session')
+  const token = browserStorage.get('admin_token')
 
-  if (!stored) {
+  if (!stored || !token) {
     return null
   }
 
   try {
+    if (isJwtExpired(token)) {
+      didExpireStoredSession = true
+      clearStoredAdminSession()
+      return null
+    }
+
     return JSON.parse(stored) as AuthSession
   } catch {
-    browserStorage.remove('admin_session')
-    browserStorage.remove('admin_token')
+    clearStoredAdminSession()
     return null
   }
 }
@@ -84,6 +119,9 @@ function App() {
   const [startupProgress, setStartupProgress] = useState(0)
   const [isUpdatedStartup] = useState(hasAppUpdate)
   const [notice, setNotice] = useState('')
+  const [loginNotice, setLoginNotice] = useState(
+    didExpireStoredSession ? 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง' : '',
+  )
 
   useEffect(() => {
     if (!session || !isStarting) {
@@ -227,12 +265,12 @@ function App() {
     browserStorage.set('admin_token', nextSession.token)
     browserStorage.set('admin_session', JSON.stringify(nextSession))
     browserStorage.set(appBuildStorageKey, __APP_BUILD_ID__)
+    setLoginNotice('')
     setSession(nextSession)
   }
 
   const handleLogout = () => {
-    browserStorage.remove('admin_token')
-    browserStorage.remove('admin_session')
+    clearStoredAdminSession()
     browserStorage.remove(activePageStorageKey)
     browserStorage.remove(pendingApplicationCountStorageKey)
     browserStorage.remove(pendingApplicationLastSyncedAtStorageKey)
@@ -243,8 +281,30 @@ function App() {
     setActivePage('dashboard')
   }
 
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      clearStoredAdminSession()
+      browserStorage.remove(activePageStorageKey)
+      browserStorage.remove(pendingApplicationCountStorageKey)
+      browserStorage.remove(pendingApplicationLastSyncedAtStorageKey)
+      setPendingApplicationCountState(0)
+      setPendingApplicationLastSyncedAtState(0)
+      setSession(null)
+      setIsStarting(false)
+      setStartupProgress(0)
+      setActivePage('dashboard')
+      setLoginNotice('เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง')
+    }
+
+    window.addEventListener(adminAuthExpiredEvent, handleAuthExpired)
+
+    return () => {
+      window.removeEventListener(adminAuthExpiredEvent, handleAuthExpired)
+    }
+  }, [])
+
   if (!session) {
-    return <LoginPage onLogin={handleLogin} />
+    return <LoginPage initialNotice={loginNotice} onLogin={handleLogin} />
   }
 
   if (isStarting) {

@@ -65,6 +65,17 @@ type ApiErrorData = {
   message?: string
 }
 
+export const adminAuthExpiredEvent = 'mikijapan-admin-auth-expired'
+
+const notifyAdminAuthExpired = () => {
+  browserStorage.remove('admin_token')
+  browserStorage.remove('admin_session')
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(adminAuthExpiredEvent))
+  }
+}
+
 export const getApiErrorMessage = (
   error: unknown,
   fallback = 'ทำรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
@@ -100,6 +111,17 @@ api.interceptors.request.use((config) => {
 
   return config
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      notifyAdminAuthExpired()
+    }
+
+    return Promise.reject(error)
+  },
+)
 
 export const authApi = {
   async login(payload: LoginPayload) {

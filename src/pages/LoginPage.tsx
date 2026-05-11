@@ -5,15 +5,16 @@ import { MikiJapanLogo } from '../components/MikiJapanLogo'
 import { authApi, type AuthSession, type LoginPayload } from '../services/api'
 
 type LoginPageProps = {
+  initialNotice?: string
   onLogin: (session: AuthSession) => void
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ initialNotice = '', onLogin }: LoginPageProps) {
   const [payload, setPayload] = useState<LoginPayload>({
     email: '',
     password: '',
   })
-  const [error, setError] = useState('')
+  const [error, setError] = useState(initialNotice)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
