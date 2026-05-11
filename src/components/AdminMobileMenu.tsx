@@ -178,25 +178,6 @@ export function AdminMobileMenu({
             })}
           </nav>
 
-          <div className="mt-4 rounded-2xl border border-[#ead8c7]/20 bg-white/10 p-3">
-            <p className="text-xs font-medium text-[#f5dfc8]">
-              สถานะข้อมูล
-            </p>
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <p className="min-w-0 text-xs text-white">
-                อัปเดตล่าสุด {lastSyncedLabel}
-              </p>
-              <button
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl bg-white/12 px-2.5 text-xs font-semibold text-white transition hover:bg-white/18"
-                onClick={onRefreshPendingApplicationCount}
-                type="button"
-              >
-                <RotateCw size={14} />
-                รีเฟรช
-              </button>
-            </div>
-          </div>
-
           <div className="mt-auto rounded-2xl border border-[#ead8c7]/25 bg-white/10 p-4">
             <p className="text-sm font-medium text-white">
               {session.user.name}
@@ -204,6 +185,25 @@ export function AdminMobileMenu({
             <p className="mt-1 break-all text-xs text-[#f5dfc8]">
               {session.user.email}
             </p>
+
+            <div className="mt-4 border-t border-[#ead8c7]/20 pt-4">
+              <p className="text-xs font-medium text-[#f5dfc8]">
+                สถานะข้อมูล
+              </p>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <p className="min-w-0 text-xs text-white">
+                  อัปเดตล่าสุด {lastSyncedLabel}
+                </p>
+                <button
+                  className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl bg-white/12 px-2.5 text-xs font-semibold text-white transition hover:bg-white/18"
+                  onClick={onRefreshPendingApplicationCount}
+                  type="button"
+                >
+                  <RotateCw size={14} />
+                  รีเฟรช
+                </button>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
