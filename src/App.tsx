@@ -9,7 +9,9 @@ import { StartupSplash } from './components/StartupSplash'
 import {
   adminAuthExpiredEvent,
   applicationApi,
+  clearAdminAuthStorage,
   isApiConfigured,
+  storeAdminSession,
   subscribeApplicationEvents,
   type AuthSession,
 } from './services/api'
@@ -27,8 +29,7 @@ const adminPages: AdminPage[] = ['dashboard', 'customers', 'messages']
 let didExpireStoredSession = false
 
 const clearStoredAdminSession = () => {
-  browserStorage.remove('admin_token')
-  browserStorage.remove('admin_session')
+  clearAdminAuthStorage()
 }
 
 const isJwtExpired = (token: string) => {
@@ -56,19 +57,33 @@ const isJwtExpired = (token: string) => {
 const getStoredSession = () => {
   const stored = browserStorage.get('admin_session')
   const token = browserStorage.get('admin_token')
+  const storedRefreshToken = browserStorage.get('admin_refresh_token')
 
   if (!stored || !token) {
     return null
   }
 
   try {
-    if (isJwtExpired(token)) {
+    const session = JSON.parse(stored) as AuthSession
+    const refreshToken = storedRefreshToken || session.refreshToken
+
+    if (!refreshToken || isJwtExpired(refreshToken)) {
       didExpireStoredSession = true
       clearStoredAdminSession()
       return null
     }
 
-    return JSON.parse(stored) as AuthSession
+    if (isJwtExpired(token)) {
+      return {
+        ...session,
+        refreshToken,
+      }
+    }
+
+    return {
+      ...session,
+      refreshToken,
+    }
   } catch {
     clearStoredAdminSession()
     return null
@@ -262,8 +277,7 @@ function App() {
   }
 
   const handleLogin = (nextSession: AuthSession) => {
-    browserStorage.set('admin_token', nextSession.token)
-    browserStorage.set('admin_session', JSON.stringify(nextSession))
+    storeAdminSession(nextSession)
     browserStorage.set(appBuildStorageKey, __APP_BUILD_ID__)
     setLoginNotice('')
     setSession(nextSession)

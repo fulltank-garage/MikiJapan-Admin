@@ -50,6 +50,7 @@ export type LoginPayload = {
 
 export type AuthSession = {
   token: string
+  refreshToken: string
   user: {
     name: string
     email: string
@@ -67,9 +68,38 @@ type ApiErrorData = {
 
 export const adminAuthExpiredEvent = 'mikijapan-admin-auth-expired'
 
-const notifyAdminAuthExpired = () => {
+export const clearAdminAuthStorage = () => {
   browserStorage.remove('admin_token')
+  browserStorage.remove('admin_refresh_token')
   browserStorage.remove('admin_session')
+}
+
+export const storeAdminSession = (session: AuthSession) => {
+  browserStorage.set('admin_token', session.token)
+  browserStorage.set('admin_refresh_token', session.refreshToken)
+  browserStorage.set('admin_session', JSON.stringify(session))
+}
+
+const getStoredRefreshToken = () => {
+  const refreshToken = browserStorage.get('admin_refresh_token')
+  if (refreshToken) {
+    return refreshToken
+  }
+
+  const storedSession = browserStorage.get('admin_session')
+  if (!storedSession) {
+    return ''
+  }
+
+  try {
+    return (JSON.parse(storedSession) as Partial<AuthSession>).refreshToken || ''
+  } catch {
+    return ''
+  }
+}
+
+const notifyAdminAuthExpired = () => {
+  clearAdminAuthStorage()
 
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event(adminAuthExpiredEvent))
@@ -102,6 +132,36 @@ export const api = axios.create({
   timeout: 15000,
 })
 
+let refreshSessionPromise: Promise<AuthSession> | null = null
+
+const refreshAdminSession = async () => {
+  const refreshToken = getStoredRefreshToken()
+  if (!refreshToken) {
+    throw new Error('missing refresh token')
+  }
+
+  refreshSessionPromise ??= axios
+    .post<AuthSession>(
+      `${apiBaseUrl || '/api'}/auth/refresh`,
+      { refreshToken },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000,
+      },
+    )
+    .then(({ data }) => {
+      storeAdminSession(data)
+      return data
+    })
+    .finally(() => {
+      refreshSessionPromise = null
+    })
+
+  return refreshSessionPromise
+}
+
 api.interceptors.request.use((config) => {
   const token = browserStorage.get('admin_token')
 
@@ -114,8 +174,36 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
+  async (error) => {
+    if (!axios.isAxiosError(error) || error.response?.status !== 401) {
+      return Promise.reject(error)
+    }
+
+    const originalRequest = error.config as
+      | (typeof error.config & { _retry?: boolean })
+      | undefined
+    const requestUrl = originalRequest?.url || ''
+
+    if (requestUrl.includes('/auth/login')) {
+      return Promise.reject(error)
+    }
+
+    if (
+      !originalRequest ||
+      originalRequest._retry ||
+      requestUrl.includes('/auth/refresh')
+    ) {
+      notifyAdminAuthExpired()
+      return Promise.reject(error)
+    }
+
+    try {
+      originalRequest._retry = true
+      const session = await refreshAdminSession()
+      originalRequest.headers.Authorization = `Bearer ${session.token}`
+
+      return api(originalRequest)
+    } catch {
       notifyAdminAuthExpired()
     }
 
