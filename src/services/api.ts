@@ -117,10 +117,9 @@ export const getApiErrorMessage = (
   return error instanceof Error ? error.message : fallback
 }
 
-const defaultApiBaseUrl =
-  'https://mikijapan-api-production-7e32.up.railway.app/api'
 const apiBaseUrl =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) || defaultApiBaseUrl
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  (import.meta.env.DEV ? 'http://localhost:8080/api' : '')
 
 export const isApiConfigured = Boolean(apiBaseUrl)
 
